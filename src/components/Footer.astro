@@ -1,0 +1,99 @@
+---
+import { site } from '../site.config';
+import { href } from '../lib/url';
+
+const year = new Date().getFullYear();
+const socials = [
+  ['GitHub', site.social.github],
+  ['Google Scholar', site.social.scholar],
+  ['LinkedIn', site.social.linkedin],
+  ['Bluesky', site.social.bluesky],
+  ['X', site.social.x],
+  ['YouTube', site.social.youtube],
+].filter(([, url]) => url) as [string, string][];
+const address = [site.address.street, [site.address.postalCode, site.address.city].filter(Boolean).join(' '), site.address.country].filter(Boolean);
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__col">
+      <p class="site-footer__name">{site.name}</p>
+      <p class="muted small">{site.institution.name}</p>
+      {site.institution.department && <p class="muted small">{site.institution.department}</p>}
+    </div>
+    <div class="site-footer__col">
+      <p class="eyebrow">Visit</p>
+      <address class="small muted">
+        {address.map((line) => <span>{line}</span>)}
+      </address>
+    </div>
+    <div class="site-footer__col">
+      <p class="eyebrow">Contact</p>
+      <ul class="site-footer__links small">
+        {site.email && <li><a class="link" href={`mailto:${site.email}`}>{site.email}</a></li>}
+        {socials.map(([label, url]) => <li><a class="link" href={url} rel="me noopener">{label}</a></li>)}
+      </ul>
+    </div>
+    <div class="site-footer__col">
+      <p class="eyebrow">Follow</p>
+      <ul class="site-footer__links small">
+        <li><a class="link" href={href('/rss.xml')}>RSS feed</a></li>
+        <li><a class="link" href={href('/publications.bib')}>publications.bib</a></li>
+        <li><a class="link" href={href('/llms.txt')}>llms.txt</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container site-footer__meta small faint">
+    <span>© {year} {site.name}</span>
+    <a href={site.institution.url} rel="noopener">{site.institution.shortName}</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-2xl);
+    border-top: 1px solid var(--line);
+    background: var(--paper-2);
+    padding-block: var(--space-xl) var(--space-l);
+  }
+  .site-footer__inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-l);
+  }
+  .site-footer__name {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+  }
+  .eyebrow {
+    margin-bottom: var(--space-s);
+  }
+  address {
+    font-style: normal;
+    display: grid;
+    gap: 0.15rem;
+  }
+  .site-footer__links {
+    list-style: none;
+    display: grid;
+    gap: 0.35rem;
+  }
+  .site-footer__links .link {
+    text-decoration-color: transparent;
+    color: var(--ink-2);
+  }
+  .site-footer__links .link:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+  .site-footer__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-m);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--line);
+  }
+</style>

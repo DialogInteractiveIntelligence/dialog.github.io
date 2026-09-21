@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/url';
+import { site } from '../site.config';
+---
+
+<Base title="Page not found" description={`This page does not exist on the ${site.name} website.`} noindex>
+  <section class="container not-found">
+    <p class="eyebrow">404</p>
+    <h1>Page not found</h1>
+    <p class="lede measure">The page you were looking for has moved or never existed.</p>
+    <ul class="not-found__links">
+      <li><a class="pill" href={href('/')}>Home</a></li>
+      {site.nav.map((item) => <li><a class="pill" href={href(item.href)}>{item.label}</a></li>)}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .not-found {
+    padding-block: var(--space-2xl);
+    display: grid;
+    gap: var(--space-s);
+  }
+  .not-found__links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: var(--space-m);
+  }
+</style>

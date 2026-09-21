@@ -1,0 +1,108 @@
+---
+/**
+ * Page shell: <head> with all SEO/social/structured-data tags, header, footer.
+ * Every page passes a `title` and `description`; optional props refine the
+ * Open Graph type, image and JSON-LD.
+ */
+import '@fontsource-variable/inter';
+import '@fontsource-variable/fraunces';
+import '../styles/global.css';
+import { getImage } from 'astro:assets';
+import groupPhoto from '../assets/group.jpg';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../site.config';
+import { absolute, href } from '../lib/url';
+import { organizationJsonLd, websiteJsonLd } from '../lib/seo';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Use `title` as-is instead of "Title · Site". */
+  bareTitle?: boolean;
+  /** Absolute URL (or site-relative path) of the social preview image. */
+  image?: string;
+  imageAlt?: string;
+  ogType?: 'website' | 'article' | 'profile';
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  /** Extra JSON-LD objects for this page. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = site.tagline,
+  bareTitle = false,
+  image,
+  imageAlt = site.groupPhotoAlt,
+  ogType = 'website',
+  publishedTime,
+  modifiedTime,
+  jsonLd = [],
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = bareTitle ? title : `${title} · ${site.shortName}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+
+const defaultOg = await getImage({ src: groupPhoto, width: 1200, height: 630, format: 'jpg', quality: 82 });
+const ogImage = image ? absolute(image, Astro.site) : absolute(defaultOg.src, Astro.site);
+
+const structured = [
+  organizationJsonLd(Astro.site, absolute(defaultOg.src, Astro.site)),
+  websiteJsonLd(Astro.site),
+  ...(Array.isArray(jsonLd) ? jsonLd : [jsonLd]),
+];
+---
+
+<!doctype html>
+<html lang={site.locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex, nofollow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />}
+    <meta name="keywords" content={site.keywords.join(', ')} />
+    <meta name="author" content={site.name} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171716" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={href('/apple-touch-icon.png')} />
+    <link rel="sitemap" href={href('/sitemap-index.xml')} />
+    <link rel="alternate" type="application/rss+xml" title={`${site.shortName} news`} href={href('/rss.xml')} />
+    <link rel="alternate" type="text/plain" title="llms.txt" href={href('/llms.txt')} />
+
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta property="og:locale" content="en_US" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime.toISOString()} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime.toISOString()} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+
+    <slot name="head" />
+
+    {structured.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Nav />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

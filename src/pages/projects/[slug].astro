@@ -1,0 +1,257 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Portrait from '../../components/Portrait.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import PublicationRow from '../../components/PublicationRow.astro';
+import NewsItem from '../../components/NewsItem.astro';
+import { href } from '../../lib/url';
+import { sortPublications } from '../../lib/people';
+import { breadcrumbJsonLd, projectJsonLd } from '../../lib/seo';
+import { formatMonth } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+
+const people = await getCollection('people');
+const team = d.people.map((slug) => people.find((p) => p.id === slug)).filter((p): p is (typeof people)[number] => !!p);
+const publications = sortPublications((await getCollection('publications')).filter((p) => p.data.project === project.id));
+const news = (await getCollection('news', ({ data }) => !data.draft && data.projects.includes(project.id)))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 5);
+
+const og = await getImage({ src: d.image, width: 1200, height: 630, format: 'jpg' });
+const links = [
+  d.links.website && { label: 'Website', url: d.links.website },
+  d.links.code && { label: 'Code', url: d.links.code },
+  d.links.demo && { label: 'Demo', url: d.links.demo },
+  d.links.paper && { label: 'Paper', url: d.links.paper },
+].filter(Boolean) as { label: string; url: string }[];
+
+const jsonLd = [
+  breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'Projects', path: '/projects/' }, { name: d.title, path: `/projects/${project.id}/` }], Astro.site),
+  projectJsonLd(project, Astro.site, og.src, team),
+];
+---
+
+<Base title={d.title} description={d.summary} ogType="article" image={og.src} imageAlt={d.imageAlt ?? d.title} jsonLd={jsonLd}>
+  <article class="container project">
+    <a class="arrow-link arrow-link--back" href={href('/projects/')}>Projects</a>
+
+    <header class="project__header">
+      <div class="project__intro">
+        <p class="eyebrow">{d.status === 'finished' ? 'Finished project' : 'Project'}{d.tags.length > 0 && ` · ${d.tags.join(' · ')}`}</p>
+        <h1>{d.title}</h1>
+        <p class="lede">{d.summary}</p>
+        {links.length > 0 && <ul class="project__links">{links.map((l) => <li><a class="pill" href={l.url} rel="noopener">{l.label}</a></li>)}</ul>}
+      </div>
+      <figure class="project__figure thumb">
+        <Image src={d.image} widths={[720, 1200, 1800]} sizes="(min-width: 76rem) 72rem, 100vw" alt={d.imageAlt ?? ''} loading="eager" fetchpriority="high" />
+      </figure>
+    </header>
+
+    <div class="project__layout">
+      <div class="project__body prose">
+        <Content />
+      </div>
+      <aside class="project__aside">
+        {
+          team.length > 0 && (
+            <section>
+              <p class="eyebrow">Team</p>
+              <ul class="team">
+                {team.map((p) => (
+                  <li>
+                    <a class="team__member" href={href(`/people/${p.id}/`)}>
+                      <span class="team__avatar">
+                        <Portrait person={p} size={96} />
+                      </span>
+                      <span>
+                        <span class="team__name">{p.data.name}</span>
+                        <span class="small muted">{p.data.title}</span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+        {
+          d.collaborators.length > 0 && (
+            <section>
+              <p class="eyebrow">Collaborators</p>
+              <ul class="aside-list small muted">
+                {d.collaborators.map((c) => (
+                  <li>{c}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+        {
+          (d.start || d.funding) && (
+            <section>
+              <p class="eyebrow">Details</p>
+              <dl class="details small">
+                {d.start && (
+                  <>
+                    <dt class="faint">Period</dt>
+                    <dd>
+                      {formatMonth(d.start)}
+                      {d.end ? ` – ${formatMonth(d.end)}` : ' – present'}
+                    </dd>
+                  </>
+                )}
+                {d.funding && (
+                  <>
+                    <dt class="faint">Funding</dt>
+                    <dd>{d.funding}</dd>
+                  </>
+                )}
+              </dl>
+            </section>
+          )
+        }
+      </aside>
+    </div>
+
+    {
+      publications.length > 0 && (
+        <section class="section">
+          <SectionHeading title="Publications" />
+          <div>
+            {publications.map((pub) => (
+              <PublicationRow pub={pub} people={people} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      news.length > 0 && (
+        <section class="section">
+          <SectionHeading title="News" href={href('/news/')} linkLabel="All news" />
+          <div>
+            {news.map((post) => (
+              <NewsItem post={post} compact />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .project {
+    padding-top: var(--space-l);
+  }
+  .arrow-link--back::after {
+    content: none;
+  }
+  .arrow-link--back::before {
+    content: '←';
+    margin-right: 0.35em;
+  }
+  .project__header {
+    display: grid;
+    gap: var(--space-l);
+    margin-block: var(--space-l) var(--space-xl);
+  }
+  .project__intro {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 48rem;
+  }
+  .project__intro h1 {
+    font-size: var(--step-4);
+  }
+  .project__links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: var(--space-xs);
+  }
+  .project__figure {
+    margin: 0;
+    aspect-ratio: 21 / 9;
+    border-radius: var(--radius-lg);
+  }
+  .project__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+  .project__aside {
+    display: grid;
+    gap: var(--space-l);
+    position: sticky;
+    top: var(--space-l);
+  }
+  .project__aside .eyebrow {
+    margin-bottom: var(--space-s);
+  }
+  .team {
+    list-style: none;
+    display: grid;
+    gap: var(--space-s);
+  }
+  .team__member {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+  }
+  .team__avatar {
+    width: 2.5rem;
+    flex: none;
+  }
+  .team__avatar :global(.portrait) {
+    border-radius: 999px;
+  }
+  .team__member > span:last-child {
+    display: grid;
+    line-height: 1.3;
+  }
+  .team__name {
+    font-weight: 500;
+  }
+  .team__member:hover .team__name {
+    color: var(--accent);
+  }
+  .aside-list {
+    list-style: none;
+    display: grid;
+    gap: 0.25rem;
+  }
+  .details {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+  }
+  .details dd {
+    margin: 0;
+  }
+  @media (max-width: 48em) {
+    .project__layout {
+      grid-template-columns: 1fr;
+    }
+    .project__aside {
+      position: static;
+    }
+    .project__figure {
+      aspect-ratio: 3 / 2;
+    }
+  }
+</style>

@@ -1,0 +1,65 @@
+---
+/** Overlapping row of small portraits, used on project cards. */
+import type { CollectionEntry } from 'astro:content';
+import Portrait from './Portrait.astro';
+
+interface Props {
+  people: CollectionEntry<'people'>[];
+  max?: number;
+}
+const { people, max = 5 } = Astro.props;
+const shown = people.slice(0, max);
+const extra = people.length - shown.length;
+---
+
+{
+  people.length > 0 && (
+    <ul class="avatars" aria-label="Team">
+      {shown.map((p) => (
+        <li title={p.data.name}>
+          <Portrait person={p} size={64} />
+          <span class="sr-only">{p.data.name}</span>
+        </li>
+      ))}
+      {extra > 0 && <li class="avatars__extra small faint">+{extra}</li>}
+    </ul>
+  )
+}
+
+<style>
+  .avatars {
+    display: flex;
+    align-items: center;
+    list-style: none;
+  }
+  .avatars li {
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-left: -0.4rem;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: 0 0 0 2px var(--paper);
+    background: var(--paper-2);
+  }
+  .avatars li:first-child {
+    margin-left: 0;
+  }
+  .avatars li :global(.portrait) {
+    border-radius: 999px;
+    border: 0;
+    font-size: 0.7rem;
+  }
+  .avatars__extra {
+    display: grid;
+    place-items: center;
+    font-weight: 600;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+</style>

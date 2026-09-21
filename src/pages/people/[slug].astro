@@ -1,0 +1,194 @@
+---
+import { getCollection, render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Portrait from '../../components/Portrait.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import PublicationRow from '../../components/PublicationRow.astro';
+import NewsItem from '../../components/NewsItem.astro';
+import { site } from '../../site.config';
+import { href } from '../../lib/url';
+import { publicationsOf, sortPublications } from '../../lib/people';
+import { breadcrumbJsonLd, personJsonLd } from '../../lib/seo';
+import { formatMonth } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const people = await getCollection('people');
+  return people.map((person) => ({ params: { slug: person.id }, props: { person } }));
+}
+
+const { person } = Astro.props;
+const d = person.data;
+const { Content } = await render(person);
+
+const people = await getCollection('people');
+const projects = (await getCollection('projects'))
+  .filter((p) => p.data.people.includes(person.id))
+  .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999));
+const publications = sortPublications(publicationsOf(person, await getCollection('publications')));
+const news = (await getCollection('news', ({ data }) => !data.draft && data.people.includes(person.id)))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 5);
+
+const og = d.photo ? await getImage({ src: d.photo, width: 1200, height: 630, format: 'jpg' }) : undefined;
+const description = `${d.name} is ${/^[aeiou]/i.test(d.title) ? 'an' : 'a'} ${d.title.toLowerCase()} at ${site.name}, ${site.institution.shortName}.`;
+
+const linkLabels: Record<string, string> = {
+  website: 'Website',
+  scholar: 'Google Scholar',
+  orcid: 'ORCID',
+  github: 'GitHub',
+  linkedin: 'LinkedIn',
+  bluesky: 'Bluesky',
+  x: 'X',
+  dblp: 'DBLP',
+};
+const links = Object.entries(d.links ?? {}).filter(([, url]) => url) as [string, string][];
+
+const jsonLd = [
+  breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'People', path: '/people/' }, { name: d.name, path: `/people/${person.id}/` }], Astro.site),
+  personJsonLd(person, Astro.site, og?.src),
+];
+---
+
+<Base title={d.name} description={description} ogType="profile" image={og?.src} imageAlt={`Portrait of ${d.name}`} jsonLd={jsonLd}>
+  <article class="container person">
+    <a class="arrow-link arrow-link--back" href={href('/people/')}>People</a>
+    <header class="person__header">
+      <div class="person__portrait">
+        <Portrait person={person} size={640} loading="eager" />
+      </div>
+      <div class="person__intro">
+        <p class="eyebrow">{d.title}</p>
+        <h1>{d.name}</h1>
+        {d.role === 'alumni' && d.now && <p class="muted">Now: {d.now}</p>}
+        {
+          (d.joined || d.left) && (
+            <p class="small faint">
+              {d.joined && `Joined ${formatMonth(d.joined)}`}
+              {d.joined && d.left && ' · '}
+              {d.left && `Left ${formatMonth(d.left)}`}
+            </p>
+          )
+        }
+        {
+          (links.length > 0 || d.email) && (
+            <ul class="person__links">
+              {d.email && (
+                <li>
+                  <a class="pill" href={`mailto:${d.email}`}>Email</a>
+                </li>
+              )}
+              {links.map(([key, url]) => (
+                <li>
+                  <a class="pill" href={url} rel="me noopener">
+                    {linkLabels[key] ?? key}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        {
+          d.interests.length > 0 && (
+            <p class="person__interests small muted">
+              <span class="faint">Interests: </span>
+              {d.interests.join(' · ')}
+            </p>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="person__bio prose">
+      <Content />
+    </div>
+
+    {
+      projects.length > 0 && (
+        <section class="section">
+          <SectionHeading title="Projects" />
+          <div class="grid grid--3">
+            {projects.map((project) => (
+              <ProjectCard project={project} people={people} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      publications.length > 0 && (
+        <section class="section">
+          <SectionHeading title="Publications" href={href('/publications/')} linkLabel="All group publications" />
+          <div>
+            {publications.map((pub) => (
+              <PublicationRow pub={pub} people={people} highlight={person.id} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      news.length > 0 && (
+        <section class="section">
+          <SectionHeading title="News" href={href('/news/')} linkLabel="All news" />
+          <div>
+            {news.map((post) => (
+              <NewsItem post={post} compact />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .person {
+    padding-top: var(--space-l);
+  }
+  .arrow-link--back::after {
+    content: none;
+  }
+  .arrow-link--back::before {
+    content: '←';
+    margin-right: 0.35em;
+  }
+  .person__header {
+    display: grid;
+    grid-template-columns: minmax(10rem, 16rem) 1fr;
+    gap: var(--space-xl);
+    align-items: start;
+    margin-block: var(--space-l) var(--space-xl);
+  }
+  .person__intro {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+  .person__intro h1 {
+    font-size: var(--step-4);
+  }
+  .person__links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: var(--space-xs);
+  }
+  .person__bio {
+    margin-bottom: var(--space-xl);
+  }
+  @media (max-width: 40em) {
+    .person__header {
+      grid-template-columns: 1fr;
+      gap: var(--space-m);
+    }
+    .person__portrait {
+      max-width: 12rem;
+    }
+  }
+</style>

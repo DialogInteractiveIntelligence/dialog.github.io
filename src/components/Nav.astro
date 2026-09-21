@@ -1,0 +1,77 @@
+---
+import { site } from '../site.config';
+import { href, isActive } from '../lib/url';
+
+const current = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="wordmark" href={href('/')} aria-label={`${site.name} home`}>{site.shortName}</a>
+    <nav aria-label="Primary">
+      <ul>
+        {
+          site.nav.map((item) => (
+            <li>
+              <a href={href(item.href)} aria-current={isActive(current, item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .site-header__inner {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-m);
+    flex-wrap: wrap;
+    padding-block: var(--space-m);
+  }
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    font-variation-settings: 'opsz' 48, 'SOFT' 50;
+  }
+  .wordmark:hover {
+    color: var(--accent);
+  }
+  nav ul {
+    display: flex;
+    gap: clamp(0.9rem, 2.5vw, 2rem);
+    list-style: none;
+  }
+  nav a {
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--ink-2);
+    padding-block: 0.25rem;
+    border-bottom: 1.5px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  nav a:hover {
+    color: var(--ink);
+  }
+  nav a[aria-current='page'] {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+  @media (max-width: 30rem) {
+    .site-header__inner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-s);
+    }
+  }
+</style>

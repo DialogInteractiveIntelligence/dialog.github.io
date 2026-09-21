@@ -1,0 +1,189 @@
+---
+import { getCollection } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Authors from '../../components/Authors.astro';
+import { href } from '../../lib/url';
+import { breadcrumbJsonLd, citationMeta, publicationJsonLd } from '../../lib/seo';
+
+export async function getStaticPaths() {
+  const publications = await getCollection('publications');
+  return publications.map((pub) => ({ params: { key: pub.id }, props: { pub } }));
+}
+
+const { pub } = Astro.props;
+const d = pub.data;
+const people = await getCollection('people');
+const project = d.project ? (await getCollection('projects')).find((p) => p.id === d.project) : undefined;
+
+const og = d.image ? await getImage({ src: d.image, width: 1200, height: 630, format: 'jpg' }) : undefined;
+const links = [
+  d.pdf && { label: 'PDF', url: d.pdf },
+  d.doi && { label: 'DOI', url: `https://doi.org/${d.doi}` },
+  d.url && (!d.doi || !d.url.includes('doi.org')) && { label: 'Publisher', url: d.url },
+  d.code && { label: 'Code', url: d.code },
+  d.website && { label: 'Website', url: d.website },
+  d.video && { label: 'Video', url: d.video },
+].filter(Boolean) as { label: string; url: string }[];
+
+const authorNames = d.authors.map((a) => a.name);
+const authorLine = authorNames.length > 3 ? `${authorNames.slice(0, 3).join(', ')} et al.` : authorNames.join(', ');
+const description = d.abstract ? d.abstract.slice(0, 200).replace(/\s+\S*$/, '') + (d.abstract.length > 200 ? '…' : '') : `${authorLine}. ${d.venue}${d.year ? `, ${d.year}` : ''}.`;
+const citation = [
+  authorLine,
+  d.year ? `(${d.year})` : '',
+  `${d.title}.`,
+  d.venue ? `${d.venue}${d.volume ? ` ${d.volume}` : ''}${d.number ? `(${d.number})` : ''}${d.pages ? `, ${d.pages}` : ''}.` : '',
+]
+  .filter(Boolean)
+  .join(' ');
+
+const jsonLd = [
+  breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'Publications', path: '/publications/' }, { name: d.title, path: `/publications/${pub.id}/` }], Astro.site),
+  publicationJsonLd(pub, Astro.site, og?.src),
+];
+const meta = citationMeta(pub, Astro.site);
+---
+
+<Base title={d.title} description={description} ogType="article" image={og?.src} imageAlt={d.title} jsonLd={jsonLd}>
+  <Fragment slot="head">
+    {meta.map((m) => <meta name={m.name} content={m.content} />)}
+    {d.doi && <meta name="dc.identifier" content={`doi:${d.doi}`} />}
+  </Fragment>
+
+  <article class="container paper">
+    <a class="arrow-link arrow-link--back" href={href('/publications/')}>Publications</a>
+
+    <header class="paper__header">
+      <div class="paper__intro">
+        <p class="eyebrow">{d.typeLabel}{d.year && ` · ${d.year}`}</p>
+        <h1>{d.title}</h1>
+        <p class="paper__authors"><Authors authors={d.authors} people={people} /></p>
+        {
+          d.venue && (
+            <p class="muted">
+              <cite>{d.venue}</cite>
+              {d.volume && `, vol. ${d.volume}`}
+              {d.number && ` (${d.number})`}
+              {d.pages && `, pp. ${d.pages}`}
+              {d.publisher && `. ${d.publisher}`}
+            </p>
+          )
+        }
+        <ul class="paper__links">
+          {links.map((l) => <li><a class="pill pill--accent" href={l.url} rel="noopener">{l.label}</a></li>)}
+          {project && <li><a class="pill" href={href(`/projects/${project.id}/`)}>Project: {project.data.title}</a></li>}
+        </ul>
+      </div>
+      {
+        d.image && (
+          <figure class="paper__figure thumb">
+            <Image src={d.image} widths={[480, 800, 1200]} sizes="(min-width: 60em) 24rem, 100vw" alt="" loading="eager" />
+          </figure>
+        )
+      }
+    </header>
+
+    {
+      d.abstract && (
+        <section class="paper__section">
+          <h2 class="paper__h2">Abstract</h2>
+          <p class="prose">{d.abstract}</p>
+        </section>
+      )
+    }
+
+    <section class="paper__section">
+      <h2 class="paper__h2">Cite</h2>
+      <p class="paper__citation muted measure">{citation}</p>
+      <pre class="paper__bibtex"><code>{d.bibtex}</code></pre>
+    </section>
+
+    {
+      d.note && (
+        <section class="paper__section">
+          <h2 class="paper__h2">Note</h2>
+          <p class="muted measure">{d.note}</p>
+        </section>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .paper {
+    padding-top: var(--space-l);
+  }
+  .arrow-link--back::after {
+    content: none;
+  }
+  .arrow-link--back::before {
+    content: '←';
+    margin-right: 0.35em;
+  }
+  .paper__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+    gap: var(--space-xl);
+    align-items: start;
+    margin-block: var(--space-l) var(--space-xl);
+  }
+  .paper__intro {
+    display: grid;
+    gap: var(--space-s);
+  }
+  .paper__intro h1 {
+    font-size: var(--step-3);
+  }
+  .paper__authors {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+  cite {
+    font-style: italic;
+  }
+  .paper__links {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: var(--space-xs);
+  }
+  .paper__figure {
+    margin: 0;
+    aspect-ratio: 4 / 3;
+  }
+  .paper__section {
+    padding-block: var(--space-l);
+    border-top: 1px solid var(--line);
+    display: grid;
+    gap: var(--space-s);
+  }
+  .paper__h2 {
+    font-size: var(--step-1);
+  }
+  .paper__citation {
+    text-wrap: pretty;
+  }
+  .paper__bibtex {
+    margin: var(--space-xs) 0 0;
+    padding: 1rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  @media (max-width: 48em) {
+    .paper__header {
+      grid-template-columns: 1fr;
+    }
+    .paper__figure {
+      order: -1;
+      max-width: 22rem;
+    }
+  }
+</style>

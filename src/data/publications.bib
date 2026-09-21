@@ -1,0 +1,62 @@
+% Publications of the group. One entry per paper.
+%
+% Standard BibTeX fields are used for the reference itself. These extra,
+% optional fields drive the website (see src/lib/bibtex-loader.ts):
+%
+%   image    = {../assets/publications/<key>.jpg}   thumbnail (4:3), path relative to this file
+%   pdf      = {https://...}                         link to the PDF
+%   code     = {https://github.com/...}              link to code
+%   website  = {https://...}                         project or paper page
+%   video    = {https://...}                         talk or demo video
+%   selected = {true}                                show on the homepage
+%   project  = {<project-slug>}                      links the paper to src/content/projects/<slug>.md
+%   abstract = {...}                                 shown on the paper's page
+%
+% Authors who are group members are linked automatically when their last name
+% and first initial match a file in src/content/people (see `bibNames` there).
+
+@inproceedings{doe2026grounding,
+  title     = {Grounding Language Agents in Multi-Party Dialogue},
+  author    = {Doe, Jane and Weijers, Ruben and Santos, Maria},
+  booktitle = {Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (ACL)},
+  year      = {2026},
+  month     = {jul},
+  pages     = {1--14},
+  doi       = {10.18653/v1/2026.acl-long.1},
+  abstract  = {Placeholder abstract. We study how language agents establish common ground when more than two participants take part in a conversation, and propose a method that tracks per-participant beliefs. Replace this text with the real abstract.},
+  image     = {../assets/publications/doe2026grounding.jpg},
+  pdf       = {https://example.org/papers/doe2026grounding.pdf},
+  code      = {https://github.com/DialogInteractiveIntelligence/grounding},
+  selected  = {true},
+  project   = {dialogue-grounding},
+  keywords  = {dialogue, grounding, language agents}
+}
+
+@article{santos2025adaptive,
+  title     = {Adaptive Assistants That Learn When to Interrupt},
+  author    = {Santos, Maria and Doe, Jane},
+  journal   = {ACM Transactions on Interactive Intelligent Systems},
+  volume    = {15},
+  number    = {2},
+  pages     = {1--28},
+  year      = {2025},
+  month     = {nov},
+  doi       = {10.1145/0000000.0000000},
+  abstract  = {Placeholder abstract. We present a model that decides when an assistant should proactively speak, learned from interaction logs and validated in a user study with 48 participants.},
+  image     = {../assets/publications/santos2025adaptive.jpg},
+  pdf       = {https://example.org/papers/santos2025adaptive.pdf},
+  selected  = {true},
+  project   = {adaptive-assistants}
+}
+
+@inproceedings{weijers2025evaluating,
+  title     = {Evaluating Conversational Repair in Human--Agent Interaction},
+  author    = {Weijers, Ruben and van der Berg, Jos{\'e} and Doe, Jane},
+  booktitle = {Proceedings of the CHI Conference on Human Factors in Computing Systems},
+  year      = {2025},
+  month     = {apr},
+  doi       = {10.1145/0000000.0000001},
+  pdf       = {https://example.org/papers/weijers2025evaluating.pdf},
+  video     = {https://www.youtube.com/},
+  project   = {dialogue-grounding}
+}

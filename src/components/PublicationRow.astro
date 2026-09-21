@@ -1,0 +1,152 @@
+---
+/** One publication in a list: thumbnail, title, authors, venue and link pills. */
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import Authors from './Authors.astro';
+import { href } from '../lib/url';
+
+interface Props {
+  pub: CollectionEntry<'publications'>;
+  people: CollectionEntry<'people'>[];
+  highlight?: string;
+  /** Hide the year (when rows are already grouped by year). */
+  hideYear?: boolean;
+  loading?: 'lazy' | 'eager';
+}
+const { pub, people, highlight, hideYear = false, loading = 'lazy' } = Astro.props;
+const d = pub.data;
+const pageHref = href(`/publications/${pub.id}/`);
+const links = [
+  d.pdf && { label: 'PDF', url: d.pdf },
+  d.doi && { label: 'DOI', url: `https://doi.org/${d.doi}` },
+  !d.doi && d.url && { label: 'Link', url: d.url },
+  d.code && { label: 'Code', url: d.code },
+  d.website && { label: 'Website', url: d.website },
+  d.video && { label: 'Video', url: d.video },
+  d.project && { label: 'Project', url: href(`/projects/${d.project}/`) },
+].filter(Boolean) as { label: string; url: string }[];
+---
+
+<article class="pub" id={pub.id}>
+  <a class="thumb pub__thumb" href={pageHref} aria-hidden="true" tabindex="-1">
+    {
+      d.image ? (
+        <Image src={d.image} width={320} height={240} widths={[320, 640]} sizes="(min-width: 40em) 160px, 25vw" alt="" loading={loading} />
+      ) : (
+        <span class="pub__thumb-fallback" aria-hidden="true">{d.typeLabel}</span>
+      )
+    }
+  </a>
+  <div class="pub__body">
+    <h3 class="pub__title"><a href={pageHref}>{d.title}</a></h3>
+    <p class="pub__authors"><Authors authors={d.authors} people={people} highlight={highlight} /></p>
+    <p class="pub__venue small muted">
+      {d.venue && <cite>{d.venue}</cite>}
+      {d.venue && !hideYear && d.year && ', '}
+      {!hideYear && d.year && <span>{d.year}</span>}
+      {!d.venue && hideYear && <span>{d.typeLabel}</span>}
+    </p>
+    <div class="pub__links">
+      {links.map((l) => <a class="pill" href={l.url} rel={l.url.startsWith('http') ? 'noopener' : undefined}>{l.label}</a>)}
+      <details class="bibtex">
+        <summary class="pill">BibTeX</summary>
+        <pre><code>{d.bibtex}</code></pre>
+      </details>
+    </div>
+  </div>
+</article>
+
+<style>
+  .pub {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: var(--space-m) var(--space-l);
+    padding-block: var(--space-m);
+  }
+  .pub + .pub {
+    border-top: 1px solid var(--line);
+  }
+  .pub__thumb {
+    aspect-ratio: 4 / 3;
+    align-self: start;
+    display: grid;
+    place-items: center;
+  }
+  .pub__thumb-fallback {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    text-align: center;
+    padding: 0.5rem;
+  }
+  .pub__body {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+  .pub__title {
+    font-family: var(--font-body);
+    font-size: var(--step-0);
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+  .pub__title a:hover {
+    color: var(--accent);
+  }
+  .pub__authors {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  cite {
+    font-style: italic;
+  }
+  .pub__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+    min-width: 0;
+  }
+  .bibtex {
+    display: contents;
+  }
+  .bibtex summary {
+    list-style: none;
+  }
+  .bibtex summary::-webkit-details-marker {
+    display: none;
+  }
+  .bibtex[open] summary {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .bibtex pre {
+    flex-basis: 100%;
+    min-width: 0;
+    margin: 0.4rem 0 0;
+    padding: 0.85rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  @media (max-width: 40em) {
+    .pub {
+      grid-template-columns: 1fr;
+      gap: var(--space-s);
+    }
+    .pub__thumb {
+      width: 50%;
+      max-width: 12rem;
+    }
+  }
+</style>

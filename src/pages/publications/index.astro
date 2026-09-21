@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import PublicationRow from '../../components/PublicationRow.astro';
+import { site } from '../../site.config';
+import { href } from '../../lib/url';
+import { sortPublications } from '../../lib/people';
+import { breadcrumbJsonLd, collectionPageJsonLd } from '../../lib/seo';
+
+const people = await getCollection('people');
+const publications = sortPublications(await getCollection('publications'));
+
+const byYear = new Map<string, typeof publications>();
+for (const pub of publications) {
+  const y = pub.data.year ? String(pub.data.year) : 'Undated';
+  byYear.set(y, [...(byYear.get(y) ?? []), pub]);
+}
+
+const description = `Publications by ${site.name}, grouped by year, with PDFs, code and BibTeX.`;
+const jsonLd = [
+  breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'Publications', path: '/publications/' }], Astro.site),
+  collectionPageJsonLd('Publications', description, '/publications/', Astro.site, publications.map((p) => ({ name: p.data.title, path: `/publications/${p.id}/` }))),
+];
+---
+
+<Base title="Publications" description={description} jsonLd={jsonLd}>
+  <PageHeader eyebrow="What we wrote" title="Publications" lede={description}>
+    <p class="small faint">
+      <a class="link" href={href('/publications.bib')}>Download all as BibTeX</a>
+    </p>
+  </PageHeader>
+
+  <div class="container">
+    {
+      [...byYear.entries()].map(([year, pubs], i) => (
+        <section class="year" aria-labelledby={`year-${year}`}>
+          <h2 id={`year-${year}`} class="year__label">{year}</h2>
+          <div class="year__list">
+            {pubs.map((pub, j) => (
+              <PublicationRow pub={pub} people={people} hideYear loading={i === 0 && j < 4 ? 'eager' : 'lazy'} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+    {publications.length === 0 && <p class="muted">No publications yet.</p>}
+  </div>
+</Base>
+
+<style>
+  .year {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: var(--space-m) var(--space-l);
+    padding-block: var(--space-l);
+  }
+  .year + .year {
+    border-top: 1px solid var(--line);
+  }
+  .year__label {
+    font-size: var(--step-2);
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    position: sticky;
+    top: var(--space-m);
+    align-self: start;
+  }
+  .year__list > :global(.pub:first-child) {
+    padding-top: 0;
+  }
+  @media (max-width: 40em) {
+    .year {
+      grid-template-columns: 1fr;
+      gap: var(--space-s);
+    }
+    .year__label {
+      position: static;
+    }
+  }
+</style>

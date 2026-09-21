@@ -1,0 +1,139 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import PublicationRow from '../../components/PublicationRow.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import { href } from '../../lib/url';
+import { breadcrumbJsonLd, newsJsonLd } from '../../lib/seo';
+import { formatDate } from '../../lib/format';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('news', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const d = post.data;
+const { Content } = await render(post);
+
+const people = await getCollection('people');
+const relatedPeople = d.people.map((slug) => people.find((p) => p.id === slug)).filter((p): p is (typeof people)[number] => !!p);
+const relatedProjects = (await getCollection('projects')).filter((p) => d.projects.includes(p.id));
+const relatedPubs = (await getCollection('publications')).filter((p) => d.publications.includes(p.id));
+
+const og = d.image ? await getImage({ src: d.image, width: 1200, height: 630, format: 'jpg' }) : undefined;
+const jsonLd = [
+  breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'News', path: '/news/' }, { name: d.title, path: `/news/${post.id}/` }], Astro.site),
+  newsJsonLd(post, Astro.site, og?.src),
+];
+---
+
+<Base title={d.title} description={d.summary} ogType="article" image={og?.src} imageAlt={d.imageAlt ?? d.title} publishedTime={d.date} jsonLd={jsonLd}>
+  <article class="container post">
+    <a class="arrow-link arrow-link--back" href={href('/news/')}>News</a>
+
+    <header class="post__header">
+      <p class="post__meta small">
+        <time datetime={d.date.toISOString().slice(0, 10)} class="faint">{formatDate(d.date)}</time>
+        {d.tags.map((t) => <span class="tag">{t}</span>)}
+      </p>
+      <h1>{d.title}</h1>
+      <p class="lede">{d.summary}</p>
+      {
+        relatedPeople.length > 0 && (
+          <p class="small muted">
+            With{' '}
+            {relatedPeople.map((p, i) => (
+              <>
+                <a class="link" href={href(`/people/${p.id}/`)}>{p.data.name}</a>
+                {i < relatedPeople.length - 1 ? ', ' : ''}
+              </>
+            ))}
+          </p>
+        )
+      }
+    </header>
+
+    {
+      d.image && (
+        <figure class="post__figure thumb">
+          <Image src={d.image} widths={[720, 1200, 1800]} sizes="(min-width: 48em) 44rem, 100vw" alt={d.imageAlt ?? ''} loading="eager" />
+          {d.imageAlt && <figcaption class="small faint">{d.imageAlt}</figcaption>}
+        </figure>
+      )
+    }
+
+    <div class="post__body prose">
+      <Content />
+      {d.link && <p><a class="link" href={d.link} rel="noopener">Read more →</a></p>}
+    </div>
+
+    {
+      relatedPubs.length > 0 && (
+        <section class="section">
+          <SectionHeading title="Related publications" />
+          {relatedPubs.map((pub) => (
+            <PublicationRow pub={pub} people={people} />
+          ))}
+        </section>
+      )
+    }
+    {
+      relatedProjects.length > 0 && (
+        <section class="section">
+          <SectionHeading title="Related projects" />
+          <div class="grid grid--3">
+            {relatedProjects.map((project) => (
+              <ProjectCard project={project} people={people} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding-top: var(--space-l);
+  }
+  .arrow-link--back::after {
+    content: none;
+  }
+  .arrow-link--back::before {
+    content: '←';
+    margin-right: 0.35em;
+  }
+  .post__header {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 44rem;
+    margin-block: var(--space-l) var(--space-xl);
+  }
+  .post__meta {
+    display: flex;
+    gap: var(--space-s);
+    align-items: baseline;
+  }
+  .post__header h1 {
+    font-size: var(--step-3);
+  }
+  .post__figure {
+    margin: 0 0 var(--space-xl);
+    max-width: 44rem;
+    border: 0;
+    background: none;
+  }
+  .post__figure :global(img) {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--line);
+  }
+  .post__figure figcaption {
+    margin-top: 0.5rem;
+  }
+  .post__body {
+    margin-bottom: var(--space-xl);
+  }
+</style>

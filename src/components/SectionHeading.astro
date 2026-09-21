@@ -1,0 +1,46 @@
+---
+/** Small accent eyebrow + heading, with an optional "View all" link on the right. */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  href?: string;
+  linkLabel?: string;
+  level?: 'h1' | 'h2' | 'h3';
+  id?: string;
+}
+const { eyebrow, title, href, linkLabel = 'View all', level = 'h2', id } = Astro.props;
+const Heading = level;
+---
+
+<div class="section-heading">
+  <div>
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <Heading id={id}>{title}</Heading>
+  </div>
+  {href && <a class="arrow-link" href={href}>{linkLabel}</a>}
+</div>
+
+<style>
+  .section-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-m);
+    margin-bottom: var(--space-l);
+    padding-bottom: var(--space-s);
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow {
+    margin-bottom: 0.35rem;
+  }
+  h2,
+  h3 {
+    font-size: var(--step-2);
+  }
+  h1 {
+    font-size: var(--step-3);
+  }
+  .arrow-link {
+    padding-bottom: 0.2rem;
+  }
+</style>

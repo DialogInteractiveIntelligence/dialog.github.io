@@ -1,0 +1,77 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import NewsItem from '../../components/NewsItem.astro';
+import { site } from '../../site.config';
+import { href } from '../../lib/url';
+import { breadcrumbJsonLd, collectionPageJsonLd } from '../../lib/seo';
+
+const posts = (await getCollection('news', ({ data }) => !data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const byYear = new Map<number, typeof posts>();
+for (const post of posts) {
+  const y = post.data.date.getFullYear();
+  byYear.set(y, [...(byYear.get(y) ?? []), post]);
+}
+
+const description = `News from ${site.name}: papers, talks, grants, awards and people.`;
+const jsonLd = [
+  breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'News', path: '/news/' }], Astro.site),
+  collectionPageJsonLd('News', description, '/news/', Astro.site, posts.map((p) => ({ name: p.data.title, path: `/news/${p.id}/` }))),
+];
+---
+
+<Base title="News" description={description} jsonLd={jsonLd}>
+  <PageHeader eyebrow="What's happening" title="News" lede={description}>
+    <p class="small faint"><a class="link" href={href('/rss.xml')}>Subscribe via RSS</a></p>
+  </PageHeader>
+
+  <div class="container">
+    {
+      [...byYear.entries()].map(([year, items]) => (
+        <section class="year" aria-labelledby={`year-${year}`}>
+          <h2 id={`year-${year}`} class="year__label">{year}</h2>
+          <div class="year__list">
+            {items.map((post) => (
+              <NewsItem post={post} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+    {posts.length === 0 && <p class="muted">No news yet.</p>}
+  </div>
+</Base>
+
+<style>
+  .year {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: var(--space-m) var(--space-l);
+    padding-block: var(--space-l);
+  }
+  .year + .year {
+    border-top: 1px solid var(--line);
+  }
+  .year__label {
+    font-size: var(--step-2);
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    position: sticky;
+    top: var(--space-m);
+    align-self: start;
+  }
+  .year__list > :global(.news-item:first-child) {
+    padding-top: 0;
+  }
+  @media (max-width: 40em) {
+    .year {
+      grid-template-columns: 1fr;
+      gap: var(--space-s);
+    }
+    .year__label {
+      position: static;
+    }
+  }
+</style>

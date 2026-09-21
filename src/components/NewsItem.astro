@@ -1,0 +1,86 @@
+---
+/** One news post in a list: date on the left, title + summary on the right. */
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { href } from '../lib/url';
+import { formatDate } from '../lib/format';
+
+interface Props {
+  post: CollectionEntry<'news'>;
+  /** Compact variant for the homepage (no image). */
+  compact?: boolean;
+}
+const { post, compact = false } = Astro.props;
+const d = post.data;
+const pageHref = href(`/news/${post.id}/`);
+---
+
+<article class:list={['news-item', { 'news-item--compact': compact }]}>
+  <time class="news-item__date small faint" datetime={d.date.toISOString().slice(0, 10)}>{formatDate(d.date)}</time>
+  <div class="news-item__body">
+    {d.tags.length > 0 && <span class="tag">{d.tags[0]}</span>}
+    <h3 class="news-item__title"><a href={pageHref}>{d.title}</a></h3>
+    <p class="news-item__summary muted">{d.summary}</p>
+  </div>
+  {
+    !compact && d.image && (
+      <a class="thumb news-item__thumb" href={pageHref} aria-hidden="true" tabindex="-1">
+        <Image src={d.image} width={360} height={240} widths={[360, 720]} sizes="(min-width: 48em) 180px, 40vw" alt="" />
+      </a>
+    )
+  }
+</article>
+
+<style>
+  .news-item {
+    display: grid;
+    grid-template-columns: 7rem 1fr auto;
+    gap: var(--space-s) var(--space-l);
+    padding-block: var(--space-m);
+    align-items: start;
+  }
+  .news-item + .news-item {
+    border-top: 1px solid var(--line);
+  }
+  .news-item--compact {
+    grid-template-columns: 7rem 1fr;
+  }
+  .news-item__date {
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.2rem;
+    white-space: nowrap;
+  }
+  .news-item__body {
+    display: grid;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+  .news-item__title {
+    font-size: var(--step-1);
+  }
+  .news-item__title a:hover {
+    color: var(--accent);
+  }
+  .news-item__summary {
+    font-size: var(--step--1);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .news-item__thumb {
+    width: 11rem;
+    aspect-ratio: 3 / 2;
+  }
+  @media (max-width: 48em) {
+    .news-item,
+    .news-item--compact {
+      grid-template-columns: 1fr;
+      gap: var(--space-xs);
+    }
+    .news-item__thumb {
+      order: -1;
+      width: 100%;
+      max-width: 22rem;
+      margin-bottom: var(--space-xs);
+    }
+  }
+</style>

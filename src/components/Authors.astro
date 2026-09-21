@@ -1,0 +1,51 @@
+---
+/** Author list for a publication; group members are linked to their page. */
+import type { CollectionEntry } from 'astro:content';
+import { findPerson } from '../lib/people';
+import { href } from '../lib/url';
+
+interface Props {
+  authors: CollectionEntry<'publications'>['data']['authors'];
+  people: CollectionEntry<'people'>[];
+  /** Highlight this person (on their own page). */
+  highlight?: string;
+}
+const { authors, people, highlight } = Astro.props;
+const items = authors.map((a) => ({ author: a, person: findPerson(a, people) }));
+---
+
+<span class="authors">
+  {
+    items.map(({ author, person }, i) => (
+      <>
+        {person ? (
+          <a
+            class:list={['authors__member', { 'authors__member--highlight': person.id === highlight }]}
+            href={href(`/people/${person.id}/`)}
+          >
+            {author.name}
+          </a>
+        ) : (
+          <span>{author.name}</span>
+        )}
+        {i < items.length - 2 ? ', ' : i === items.length - 2 ? (items.length > 2 ? ', and ' : ' and ') : ''}
+      </>
+    ))
+  }
+</span>
+
+<style>
+  .authors__member {
+    color: var(--ink);
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  .authors__member:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+  .authors__member--highlight {
+    color: var(--accent);
+  }
+</style>

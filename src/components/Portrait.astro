@@ -1,0 +1,66 @@
+---
+/** Square portrait; falls back to initials when no photo is set. */
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  person: CollectionEntry<'people'>;
+  /** Rendered pixel size (CSS controls the actual display size). */
+  size?: number;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+}
+const { person, size = 480, class: className, loading = 'lazy' } = Astro.props;
+const initials = person.data.name
+  .split(/\s+/)
+  .filter((w) => /^[A-ZÀ-Ý]/.test(w))
+  .map((w) => w[0])
+  .slice(0, 2)
+  .join('');
+---
+
+{
+  person.data.photo ? (
+    <Image
+      class:list={['portrait', className]}
+      src={person.data.photo}
+      width={size}
+      height={size}
+      widths={[Math.round(size / 2), size, size * 2]}
+      sizes={`(min-width: 48em) ${Math.round(size / 2)}px, 40vw`}
+      alt={`Portrait of ${person.data.name}`}
+      loading={loading}
+    />
+  ) : (
+    <div class:list={['portrait', 'portrait--initials', className]} aria-hidden="true">
+      <span>{initials}</span>
+    </div>
+  )
+}
+
+<style>
+  .portrait {
+    aspect-ratio: 1;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: var(--radius);
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+  }
+  .portrait--initials {
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: transparent;
+    container-type: inline-size;
+  }
+  /* Scale the initials with the box: cqw resolves against the nearest ancestor container (the box itself). */
+  .portrait--initials span {
+    font-size: 32cqw;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+</style>

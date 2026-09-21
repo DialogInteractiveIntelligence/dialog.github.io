@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Portrait from './Portrait.astro';
+import { href } from '../lib/url';
+
+interface Props {
+  person: CollectionEntry<'people'>;
+}
+const { person } = Astro.props;
+const d = person.data;
+---
+
+<article class="person-card">
+  <a class="person-card__link" href={href(`/people/${person.id}/`)}>
+    <Portrait person={person} size={400} />
+    <h3 class="person-card__name">{d.name}</h3>
+  </a>
+  <p class="person-card__title small muted">{d.title}</p>
+  {d.role === 'alumni' && d.now && <p class="person-card__now small faint">Now: {d.now}</p>}
+</article>
+
+<style>
+  .person-card {
+    display: grid;
+    gap: 0.25rem;
+    align-content: start;
+  }
+  .person-card__link {
+    display: grid;
+    gap: var(--space-s);
+  }
+  .person-card__link :global(.portrait) {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .person-card__link:hover :global(.portrait) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.35);
+  }
+  .person-card__name {
+    font-size: var(--step-0);
+    font-weight: 600;
+    font-family: var(--font-body);
+    letter-spacing: 0;
+    line-height: 1.3;
+  }
+  .person-card__link:hover .person-card__name {
+    color: var(--accent);
+  }
+  .person-card__title {
+    line-height: 1.35;
+  }
+</style>

@@ -1,0 +1,135 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import NewsItem from '../components/NewsItem.astro';
+import PublicationRow from '../components/PublicationRow.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import groupPhoto from '../assets/group.jpg';
+import { site } from '../site.config';
+import { href } from '../lib/url';
+import { sortPublications } from '../lib/people';
+
+const people = await getCollection('people');
+const news = (await getCollection('news', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+const selected = sortPublications((await getCollection('publications')).filter((p) => p.data.selected)).slice(0, 5);
+const projects = (await getCollection('projects'))
+  .sort((a, b) => Number(b.data.featured) - Number(a.data.featured) || (a.data.order ?? 999) - (b.data.order ?? 999))
+  .slice(0, 3);
+---
+
+<Base title={site.name} bareTitle description={site.tagline}>
+  <section class="hero container">
+    <figure class="hero__figure">
+      <Image
+        class="hero__photo"
+        src={groupPhoto}
+        widths={[720, 1200, 1800, 2400]}
+        sizes="(min-width: 76rem) 72rem, 100vw"
+        alt={site.groupPhotoAlt}
+        loading="eager"
+        fetchpriority="high"
+      />
+    </figure>
+    <div class="hero__text">
+      <h1 class="hero__title">{site.name}</h1>
+      <p class="hero__tagline lede">{site.tagline}</p>
+    </div>
+  </section>
+
+  <section class="section container about">
+    <p class="eyebrow">About the group</p>
+    <p class="about__text measure" set:html={site.about} />
+    <p class="about__inst small muted">{site.institution.name}</p>
+  </section>
+
+  {
+    news.length > 0 && (
+      <section class="section container">
+        <SectionHeading eyebrow="Latest" title="News" href={href('/news/')} linkLabel="All news" />
+        <div>
+          {news.map((post) => (
+            <NewsItem post={post} compact />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    selected.length > 0 && (
+      <section class="section container">
+        <SectionHeading eyebrow="Selected" title="Publications" href={href('/publications/')} linkLabel="All publications" />
+        <div>
+          {selected.map((pub) => (
+            <PublicationRow pub={pub} people={people} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    projects.length > 0 && (
+      <section class="section container">
+        <SectionHeading eyebrow="Research" title="Projects" href={href('/projects/')} linkLabel="All projects" />
+        <div class="grid grid--3">
+          {projects.map((project) => (
+            <ProjectCard project={project} people={people} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .hero {
+    padding-top: var(--space-l);
+    display: grid;
+    gap: var(--space-l);
+  }
+  .hero__figure {
+    margin: 0;
+  }
+  .hero__photo {
+    width: 100%;
+    aspect-ratio: 21 / 9;
+    object-fit: cover;
+    object-position: center;
+    border-radius: var(--radius-lg);
+    background: var(--paper-2);
+  }
+  .hero__text {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 44rem;
+  }
+  .hero__title {
+    font-size: var(--step-4);
+    font-weight: 500;
+  }
+  .hero__tagline {
+    font-size: var(--step-1);
+  }
+  .about {
+    display: grid;
+    gap: var(--space-s);
+  }
+  .about__text {
+    font-size: var(--step-1);
+    line-height: 1.55;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-variation-settings: 'opsz' 18, 'SOFT' 0;
+    text-wrap: pretty;
+  }
+  @media (max-width: 40em) {
+    .hero__photo {
+      aspect-ratio: 3 / 2;
+    }
+  }
+</style>

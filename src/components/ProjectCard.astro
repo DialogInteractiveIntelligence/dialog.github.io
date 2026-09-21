@@ -1,0 +1,75 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import Avatars from './Avatars.astro';
+import { href } from '../lib/url';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  people: CollectionEntry<'people'>[];
+  loading?: 'lazy' | 'eager';
+}
+const { project, people, loading = 'lazy' } = Astro.props;
+const d = project.data;
+const team = d.people.map((slug) => people.find((p) => p.id === slug)).filter((p): p is CollectionEntry<'people'> => !!p);
+---
+
+<article class="project-card">
+  <a class="project-card__link" href={href(`/projects/${project.id}/`)}>
+    <div class="thumb project-card__thumb">
+      <Image
+        src={d.image}
+        width={720}
+        height={480}
+        widths={[480, 720, 1080]}
+        sizes="(min-width: 60em) 22rem, (min-width: 40em) 45vw, 92vw"
+        alt={d.imageAlt ?? ''}
+        loading={loading}
+      />
+    </div>
+    <h3 class="project-card__title">{d.title}</h3>
+  </a>
+  <p class="project-card__summary muted">{d.summary}</p>
+  <div class="project-card__meta">
+    <Avatars people={team} />
+    {d.status === 'finished' && <span class="tag">Finished</span>}
+  </div>
+</article>
+
+<style>
+  .project-card {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+  .project-card__link {
+    display: grid;
+    gap: var(--space-m);
+  }
+  .project-card__thumb {
+    aspect-ratio: 3 / 2;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .project-card__link:hover .project-card__thumb {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px -14px rgba(0, 0, 0, 0.4);
+  }
+  .project-card__title {
+    font-size: var(--step-1);
+  }
+  .project-card__link:hover .project-card__title {
+    color: var(--accent);
+  }
+  .project-card__summary {
+    font-size: var(--step--1);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .project-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-top: var(--space-xs);
+  }
+</style>
