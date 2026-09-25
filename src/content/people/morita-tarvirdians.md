@@ -1,7 +1,7 @@
 ---
 name: Morita Tarvirdians
 role: phd
-title: PhD candidate
+title: PhD researcher
 photo: ../../assets/people/morita-tarvirdians.jpeg
 email: M.Tarvirdians@tudelft.nl
 interests:

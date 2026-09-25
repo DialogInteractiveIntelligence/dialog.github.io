@@ -1,7 +1,7 @@
 ---
 name: Ruben Weijers
 role: phd
-title: PhD candidate
+title: PhD researcher
 photo: ../../assets/people/ruben-weijers.jpg
 interests:
   - Human-Robot Interaction
