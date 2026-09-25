@@ -14,7 +14,7 @@ const groups = ROLE_ORDER.map((role) => ({
   members: people.filter((p) => p.data.role === role),
 })).filter((g) => g.members.length > 0);
 
-const description = `The members of ${site.name}: faculty, postdoctoral researchers, PhD candidates and students.`;
+const description = `People in the ${site.name} research group.`;
 const jsonLd = [
   breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'People', path: '/people/' }], Astro.site),
   collectionPageJsonLd('People', description, '/people/', Astro.site, people.map((p) => ({ name: p.data.name, path: `/people/${p.id}/` }))),
@@ -22,7 +22,7 @@ const jsonLd = [
 ---
 
 <Base title="People" description={description} jsonLd={jsonLd}>
-  <PageHeader eyebrow="Who we are" title="People" lede={description} />
+  <PageHeader title="People" />
 
   <div class="container">
     {

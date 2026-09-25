@@ -4,11 +4,10 @@ role: phd
 title: PhD candidate
 photo: ../../assets/people/ruben-weijers.jpg
 interests:
-  - Conversational repair
-  - Multi-party dialogue
+  - Human-Robot Interaction
+  - Agency
 links:
-  github: https://github.com/
-joined: 2024-09-01
+  linkedin: https://nl.linkedin.com/in/ruben-weijers
 ---
 
-Ruben studies how people and agents recover from misunderstandings in conversation. Placeholder biography.
+Ruben is a PhD candidate researching human–robot interaction and agency.

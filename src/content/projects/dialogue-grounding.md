@@ -3,10 +3,6 @@ title: Grounding in Multi-Party Dialogue
 summary: How do language agents build common ground when several people talk at once? Models, datasets and studies.
 image: ../../assets/projects/dialogue-grounding.jpg
 imageAlt: Placeholder illustration for the grounding project.
-people:
-  - jane-doe
-  - ruben-weijers
-  - jose-van-der-berg
 collaborators:
   - Example University
 status: active

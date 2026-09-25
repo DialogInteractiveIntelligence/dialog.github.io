@@ -6,10 +6,6 @@ image: ../../assets/news/acl-2026.jpg
 imageAlt: Placeholder image for the ACL 2026 announcement.
 tags:
   - paper
-people:
-  - jane-doe
-  - ruben-weijers
-  - maria-santos
 projects:
   - dialogue-grounding
 publications:

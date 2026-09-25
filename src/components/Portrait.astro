@@ -28,6 +28,8 @@ const initials = person.data.name
       height={size}
       widths={[Math.round(size / 2), size, size * 2]}
       sizes={`(min-width: 48em) ${Math.round(size / 2)}px, 40vw`}
+      fit="cover"
+      position={person.id === 'ruben-weijers' ? 'north' : undefined}
       alt={`Portrait of ${person.data.name}`}
       loading={loading}
     />
