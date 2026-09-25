@@ -5,6 +5,7 @@ import Base from '../../layouts/Base.astro';
 import PublicationRow from '../../components/PublicationRow.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
+import UnderConstruction from '../../components/UnderConstruction.astro';
 import { href } from '../../lib/url';
 import { breadcrumbJsonLd, newsJsonLd } from '../../lib/seo';
 import { formatDate } from '../../lib/format';
@@ -34,64 +35,69 @@ const jsonLd = [
   <article class="container post">
     <a class="arrow-link arrow-link--back" href={href('/news/')}>News</a>
 
-    <header class="post__header">
-      <p class="post__meta small">
-        <time datetime={d.date.toISOString().slice(0, 10)} class="faint">{formatDate(d.date)}</time>
-        {d.tags.map((t) => <span class="tag">{t}</span>)}
-      </p>
-      <h1>{d.title}</h1>
-      <p class="lede">{d.summary}</p>
+    {
+      /*
+      <header class="post__header">
+        <p class="post__meta small">
+          <time datetime={d.date.toISOString().slice(0, 10)} class="faint">{formatDate(d.date)}</time>
+          {d.tags.map((t) => <span class="tag">{t}</span>)}
+        </p>
+        <h1>{d.title}</h1>
+        <p class="lede">{d.summary}</p>
+        {
+          relatedPeople.length > 0 && (
+            <p class="small muted">
+              With{' '}
+              {relatedPeople.map((p, i) => (
+                <>
+                  <a class="link" href={href(`/people/${p.id}/`)}>{p.data.name}</a>
+                  {i < relatedPeople.length - 1 ? ', ' : ''}
+                </>
+              ))}
+            </p>
+          )
+        }
+      </header>
+
       {
-        relatedPeople.length > 0 && (
-          <p class="small muted">
-            With{' '}
-            {relatedPeople.map((p, i) => (
-              <>
-                <a class="link" href={href(`/people/${p.id}/`)}>{p.data.name}</a>
-                {i < relatedPeople.length - 1 ? ', ' : ''}
-              </>
-            ))}
-          </p>
+        d.image && (
+          <figure class="post__figure thumb">
+            <Image src={d.image} widths={[720, 1200, 1800]} sizes="(min-width: 48em) 44rem, 100vw" alt={d.imageAlt ?? ''} loading="eager" />
+            {d.imageAlt && <figcaption class="small faint">{d.imageAlt}</figcaption>}
+          </figure>
         )
       }
-    </header>
 
-    {
-      d.image && (
-        <figure class="post__figure thumb">
-          <Image src={d.image} widths={[720, 1200, 1800]} sizes="(min-width: 48em) 44rem, 100vw" alt={d.imageAlt ?? ''} loading="eager" />
-          {d.imageAlt && <figcaption class="small faint">{d.imageAlt}</figcaption>}
-        </figure>
-      )
-    }
+      <div class="post__body prose">
+        <Content />
+        {d.link && <p><a class="link" href={d.link} rel="noopener">Read more →</a></p>}
+      </div>
 
-    <div class="post__body prose">
-      <Content />
-      {d.link && <p><a class="link" href={d.link} rel="noopener">Read more →</a></p>}
-    </div>
-
-    {
-      relatedPubs.length > 0 && (
-        <section class="section">
-          <SectionHeading title="Related publications" />
-          {relatedPubs.map((pub) => (
-            <PublicationRow pub={pub} people={people} />
-          ))}
-        </section>
-      )
-    }
-    {
-      relatedProjects.length > 0 && (
-        <section class="section">
-          <SectionHeading title="Related projects" />
-          <div class="grid grid--3">
-            {relatedProjects.map((project) => (
-              <ProjectCard project={project} people={people} />
+      {
+        relatedPubs.length > 0 && (
+          <section class="section">
+            <SectionHeading title="Related publications" />
+            {relatedPubs.map((pub) => (
+              <PublicationRow pub={pub} people={people} />
             ))}
-          </div>
-        </section>
-      )
+          </section>
+        )
+      }
+      {
+        relatedProjects.length > 0 && (
+          <section class="section">
+            <SectionHeading title="Related projects" />
+            <div class="grid grid--3">
+              {relatedProjects.map((project) => (
+                <ProjectCard project={project} people={people} />
+              ))}
+            </div>
+          </section>
+        )
+      }
+      */
     }
+    <UnderConstruction message={`This news post is under construction. Please check back soon.`} />
   </article>
 </Base>
 

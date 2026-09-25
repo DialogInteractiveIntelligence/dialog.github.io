@@ -1,0 +1,18 @@
+---
+/** Placeholder notice shown on pages whose content is temporarily disabled. */
+interface Props {
+  message?: string;
+}
+const { message = 'This page is under construction. Please check back soon.' } = Astro.props;
+---
+
+<section class="section container under-construction">
+  <p class="eyebrow">Coming soon</p>
+  <p class="lede muted">{message}</p>
+</section>
+
+<style>
+  .under-construction {
+    padding-block: var(--space-xl);
+  }
+</style>

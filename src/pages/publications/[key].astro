@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Authors from '../../components/Authors.astro';
+import UnderConstruction from '../../components/UnderConstruction.astro';
 import { href } from '../../lib/url';
 import { breadcrumbJsonLd, citationMeta, publicationJsonLd } from '../../lib/seo';
 
@@ -54,59 +55,64 @@ const meta = citationMeta(pub, Astro.site);
   <article class="container paper">
     <a class="arrow-link arrow-link--back" href={href('/publications/')}>Publications</a>
 
-    <header class="paper__header">
-      <div class="paper__intro">
-        <p class="eyebrow">{d.typeLabel}{d.year && ` · ${d.year}`}</p>
-        <h1>{d.title}</h1>
-        <p class="paper__authors"><Authors authors={d.authors} people={people} /></p>
+    {
+      /*
+      <header class="paper__header">
+        <div class="paper__intro">
+          <p class="eyebrow">{d.typeLabel}{d.year && ` · ${d.year}`}</p>
+          <h1>{d.title}</h1>
+          <p class="paper__authors"><Authors authors={d.authors} people={people} /></p>
+          {
+            d.venue && (
+              <p class="muted">
+                <cite>{d.venue}</cite>
+                {d.volume && `, vol. ${d.volume}`}
+                {d.number && ` (${d.number})`}
+                {d.pages && `, pp. ${d.pages}`}
+                {d.publisher && `. ${d.publisher}`}
+              </p>
+            )
+          }
+          <ul class="paper__links">
+            {links.map((l) => <li><a class="pill pill--accent" href={l.url} rel="noopener">{l.label}</a></li>)}
+            {project && <li><a class="pill" href={href(`/projects/${project.id}/`)}>Project: {project.data.title}</a></li>}
+          </ul>
+        </div>
         {
-          d.venue && (
-            <p class="muted">
-              <cite>{d.venue}</cite>
-              {d.volume && `, vol. ${d.volume}`}
-              {d.number && ` (${d.number})`}
-              {d.pages && `, pp. ${d.pages}`}
-              {d.publisher && `. ${d.publisher}`}
-            </p>
+          d.image && (
+            <figure class="paper__figure thumb">
+              <Image src={d.image} widths={[480, 800, 1200]} sizes="(min-width: 60em) 24rem, 100vw" alt="" loading="eager" />
+            </figure>
           )
         }
-        <ul class="paper__links">
-          {links.map((l) => <li><a class="pill pill--accent" href={l.url} rel="noopener">{l.label}</a></li>)}
-          {project && <li><a class="pill" href={href(`/projects/${project.id}/`)}>Project: {project.data.title}</a></li>}
-        </ul>
-      </div>
+      </header>
+
       {
-        d.image && (
-          <figure class="paper__figure thumb">
-            <Image src={d.image} widths={[480, 800, 1200]} sizes="(min-width: 60em) 24rem, 100vw" alt="" loading="eager" />
-          </figure>
+        d.abstract && (
+          <section class="paper__section">
+            <h2 class="paper__h2">Abstract</h2>
+            <p class="prose">{d.abstract}</p>
+          </section>
         )
       }
-    </header>
 
-    {
-      d.abstract && (
-        <section class="paper__section">
-          <h2 class="paper__h2">Abstract</h2>
-          <p class="prose">{d.abstract}</p>
-        </section>
-      )
+      <section class="paper__section">
+        <h2 class="paper__h2">Cite</h2>
+        <p class="paper__citation muted measure">{citation}</p>
+        <pre class="paper__bibtex"><code>{d.bibtex}</code></pre>
+      </section>
+
+      {
+        d.note && (
+          <section class="paper__section">
+            <h2 class="paper__h2">Note</h2>
+            <p class="muted measure">{d.note}</p>
+          </section>
+        )
+      }
+      */
     }
-
-    <section class="paper__section">
-      <h2 class="paper__h2">Cite</h2>
-      <p class="paper__citation muted measure">{citation}</p>
-      <pre class="paper__bibtex"><code>{d.bibtex}</code></pre>
-    </section>
-
-    {
-      d.note && (
-        <section class="paper__section">
-          <h2 class="paper__h2">Note</h2>
-          <p class="muted measure">{d.note}</p>
-        </section>
-      )
-    }
+    <UnderConstruction message={`This publication page is under construction. Please check back soon.`} />
   </article>
 </Base>
 

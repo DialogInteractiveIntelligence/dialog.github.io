@@ -18,7 +18,7 @@ export function organizationJsonLd(siteUrl: URL | string | undefined, logoUrl?: 
     site.address.street || site.address.city
       ? {
           '@type': 'PostalAddress',
-          streetAddress: site.address.street || undefined,
+          streetAddress: [site.address.building, site.address.street].filter(Boolean).join(', ') || undefined,
           postalCode: site.address.postalCode || undefined,
           addressLocality: site.address.city || undefined,
           addressCountry: site.address.countryCode || undefined,

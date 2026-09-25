@@ -1,5 +1,5 @@
 import { defineCollection } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { bibtexLoader } from './lib/bibtex-loader';
 import { ROLE_ORDER } from './lib/people';
@@ -155,4 +155,34 @@ const publications = defineCollection({
     }),
 });
 
-export const collections = { people, projects, news, publications };
+/**
+ * Demos & talks: one entry per public appearance (demo, talk, poster, keynote),
+ * in src/data/talks.yaml. Shared across projects via the `project` field so
+ * other project pages can reuse the same collection.
+ */
+const talks = defineCollection({
+  loader: file('src/data/talks.yaml'),
+  schema: z.object({
+    id: z.string(),
+    /** ISO date (YYYY-MM-DD), or "TODO" while the date is still unknown. */
+    date: z.string(),
+    title: z.string(),
+    event: z.string(),
+    type: z.enum(['demo', 'talk', 'poster', 'keynote']).optional(),
+    location: z.string(),
+    links: z
+      .object({
+        slides: optionalUrl,
+        poster: optionalUrl,
+        video: optionalUrl,
+        photo: optionalUrl,
+        event: optionalUrl,
+      })
+      .partial()
+      .default({}),
+    /** Project slug this entry belongs to (matches src/content/projects or a bespoke project page). */
+    project: z.string(),
+  }),
+});
+
+export const collections = { people, projects, news, publications, talks };

@@ -6,6 +6,7 @@ import SectionHeading from '../components/SectionHeading.astro';
 import NewsItem from '../components/NewsItem.astro';
 import PublicationRow from '../components/PublicationRow.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import UnderConstruction from '../components/UnderConstruction.astro';
 import groupPhoto from '../assets/group.jpg';
 import { site } from '../site.config';
 import { href } from '../lib/url';
@@ -47,6 +48,7 @@ const projects = (await getCollection('projects'))
   </section>
 
   {
+    /*
     news.length > 0 && (
       <section class="section container">
         <SectionHeading eyebrow="Latest" title="News" href={href('/news/')} linkLabel="All news" />
@@ -57,9 +59,11 @@ const projects = (await getCollection('projects'))
         </div>
       </section>
     )
+    */
   }
 
   {
+    /*
     selected.length > 0 && (
       <section class="section container">
         <SectionHeading eyebrow="Selected" title="Publications" href={href('/publications/')} linkLabel="All publications" />
@@ -70,9 +74,11 @@ const projects = (await getCollection('projects'))
         </div>
       </section>
     )
+    */
   }
 
   {
+    /*
     projects.length > 0 && (
       <section class="section container">
         <SectionHeading eyebrow="Research" title="Projects" href={href('/projects/')} linkLabel="All projects" />
@@ -83,7 +89,10 @@ const projects = (await getCollection('projects'))
         </div>
       </section>
     )
+    */
   }
+
+  <UnderConstruction />
 </Base>
 
 <style>
@@ -106,7 +115,6 @@ const projects = (await getCollection('projects'))
   .hero__text {
     display: grid;
     gap: var(--space-s);
-    max-width: 44rem;
   }
   .hero__title {
     font-size: var(--step-4);

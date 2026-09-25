@@ -6,6 +6,7 @@ import Portrait from '../../components/Portrait.astro';
 import SectionHeading from '../../components/SectionHeading.astro';
 import PublicationRow from '../../components/PublicationRow.astro';
 import NewsItem from '../../components/NewsItem.astro';
+import UnderConstruction from '../../components/UnderConstruction.astro';
 import { href } from '../../lib/url';
 import { sortPublications } from '../../lib/people';
 import { breadcrumbJsonLd, projectJsonLd } from '../../lib/seo';
@@ -45,109 +46,114 @@ const jsonLd = [
   <article class="container project">
     <a class="arrow-link arrow-link--back" href={href('/projects/')}>Projects</a>
 
-    <header class="project__header">
-      <div class="project__intro">
-        <p class="eyebrow">{d.status === 'finished' ? 'Finished project' : 'Project'}{d.tags.length > 0 && ` · ${d.tags.join(' · ')}`}</p>
-        <h1>{d.title}</h1>
-        <p class="lede">{d.summary}</p>
-        {links.length > 0 && <ul class="project__links">{links.map((l) => <li><a class="pill" href={l.url} rel="noopener">{l.label}</a></li>)}</ul>}
-      </div>
-      <figure class="project__figure thumb">
-        <Image src={d.image} widths={[720, 1200, 1800]} sizes="(min-width: 76rem) 72rem, 100vw" alt={d.imageAlt ?? ''} loading="eager" fetchpriority="high" />
-      </figure>
-    </header>
-
-    <div class="project__layout">
-      <div class="project__body prose">
-        <Content />
-      </div>
-      <aside class="project__aside">
-        {
-          team.length > 0 && (
-            <section>
-              <p class="eyebrow">Team</p>
-              <ul class="team">
-                {team.map((p) => (
-                  <li>
-                    <a class="team__member" href={href(`/people/${p.id}/`)}>
-                      <span class="team__avatar">
-                        <Portrait person={p} size={96} />
-                      </span>
-                      <span>
-                        <span class="team__name">{p.data.name}</span>
-                        <span class="small muted">{p.data.title}</span>
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )
-        }
-        {
-          d.collaborators.length > 0 && (
-            <section>
-              <p class="eyebrow">Collaborators</p>
-              <ul class="aside-list small muted">
-                {d.collaborators.map((c) => (
-                  <li>{c}</li>
-                ))}
-              </ul>
-            </section>
-          )
-        }
-        {
-          (d.start || d.funding) && (
-            <section>
-              <p class="eyebrow">Details</p>
-              <dl class="details small">
-                {d.start && (
-                  <>
-                    <dt class="faint">Period</dt>
-                    <dd>
-                      {formatMonth(d.start)}
-                      {d.end ? ` – ${formatMonth(d.end)}` : ' – present'}
-                    </dd>
-                  </>
-                )}
-                {d.funding && (
-                  <>
-                    <dt class="faint">Funding</dt>
-                    <dd>{d.funding}</dd>
-                  </>
-                )}
-              </dl>
-            </section>
-          )
-        }
-      </aside>
-    </div>
-
     {
-      publications.length > 0 && (
-        <section class="section">
-          <SectionHeading title="Publications" />
-          <div>
-            {publications.map((pub) => (
-              <PublicationRow pub={pub} people={people} />
-            ))}
-          </div>
-        </section>
-      )
-    }
+      /*
+      <header class="project__header">
+        <div class="project__intro">
+          <p class="eyebrow">{d.status === 'finished' ? 'Finished project' : 'Project'}{d.tags.length > 0 && ` · ${d.tags.join(' · ')}`}</p>
+          <h1>{d.title}</h1>
+          <p class="lede">{d.summary}</p>
+          {links.length > 0 && <ul class="project__links">{links.map((l) => <li><a class="pill" href={l.url} rel="noopener">{l.label}</a></li>)}</ul>}
+        </div>
+        <figure class="project__figure thumb">
+          <Image src={d.image} widths={[720, 1200, 1800]} sizes="(min-width: 76rem) 72rem, 100vw" alt={d.imageAlt ?? ''} loading="eager" fetchpriority="high" />
+        </figure>
+      </header>
 
-    {
-      news.length > 0 && (
-        <section class="section">
-          <SectionHeading title="News" href={href('/news/')} linkLabel="All news" />
-          <div>
-            {news.map((post) => (
-              <NewsItem post={post} compact />
-            ))}
-          </div>
-        </section>
-      )
+      <div class="project__layout">
+        <div class="project__body prose">
+          <Content />
+        </div>
+        <aside class="project__aside">
+          {
+            team.length > 0 && (
+              <section>
+                <p class="eyebrow">Team</p>
+                <ul class="team">
+                  {team.map((p) => (
+                    <li>
+                      <a class="team__member" href={href(`/people/${p.id}/`)}>
+                        <span class="team__avatar">
+                          <Portrait person={p} size={96} />
+                        </span>
+                        <span>
+                          <span class="team__name">{p.data.name}</span>
+                          <span class="small muted">{p.data.title}</span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )
+          }
+          {
+            d.collaborators.length > 0 && (
+              <section>
+                <p class="eyebrow">Collaborators</p>
+                <ul class="aside-list small muted">
+                  {d.collaborators.map((c) => (
+                    <li>{c}</li>
+                  ))}
+                </ul>
+              </section>
+            )
+          }
+          {
+            (d.start || d.funding) && (
+              <section>
+                <p class="eyebrow">Details</p>
+                <dl class="details small">
+                  {d.start && (
+                    <>
+                      <dt class="faint">Period</dt>
+                      <dd>
+                        {formatMonth(d.start)}
+                        {d.end ? ` – ${formatMonth(d.end)}` : ' – present'}
+                      </dd>
+                    </>
+                  )}
+                  {d.funding && (
+                    <>
+                      <dt class="faint">Funding</dt>
+                      <dd>{d.funding}</dd>
+                    </>
+                  )}
+                </dl>
+              </section>
+            )
+          }
+        </aside>
+      </div>
+
+      {
+        publications.length > 0 && (
+          <section class="section">
+            <SectionHeading title="Publications" />
+            <div>
+              {publications.map((pub) => (
+                <PublicationRow pub={pub} people={people} />
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        news.length > 0 && (
+          <section class="section">
+            <SectionHeading title="News" href={href('/news/')} linkLabel="All news" />
+            <div>
+              {news.map((post) => (
+                <NewsItem post={post} compact />
+              ))}
+            </div>
+          </section>
+        )
+      }
+      */
     }
+    <UnderConstruction message={`The "${d.title}" project page is under construction. Please check back soon.`} />
   </article>
 </Base>
 
@@ -170,7 +176,6 @@ const jsonLd = [
   .project__intro {
     display: grid;
     gap: var(--space-s);
-    max-width: 48rem;
   }
   .project__intro h1 {
     font-size: var(--step-4);

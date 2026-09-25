@@ -18,26 +18,27 @@ export const site = {
   /** Parent institution, used in the footer and as `parentOrganization` in JSON-LD. */
   institution: {
     name: 'Interactive Intelligence, Delft University of Technology',
-    // shortName: 'TU Delft',
-    // url: 'https://www.tudelft.nl/',
-    // department: 'Intelligent Systems, Faculty of EEMCS',
+    shortName: 'TU Delft',
+    url: 'https://www.tudelft.nl/',
+    department: 'Intelligent Systems, Faculty of EEMCS',
   },
 
   /** Postal address (shown in footer and JSON-LD). Leave fields empty to hide them. */
   address: {
-    street: '1',
-    postalCode: '2',
-    city: 'j3',
-    country: '4',
-    countryCode: '5',
+    building: 'Gebouw 28',
+    street: 'Van Mourik Broekmanweg 6',
+    postalCode: '2628 XE',
+    city: 'Delft',
+    country: '',
+    countryCode: '',
   },
 
   /** General contact email shown in the footer. */
-  email: 'info@example.org',
+  email: 'C.R.M.M.Oertel@tudelft.nl',
 
   /** External profiles. Remove any you do not use. */
   social: {
-    github: 'https://github.com/DialogInteractiveIntelligence',
+    github: '',
     scholar: '',
     linkedin: '',
     bluesky: '',

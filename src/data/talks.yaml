@@ -1,0 +1,47 @@
+# Demos, talks, posters and keynotes, one entry per appearance.
+#
+# Schema (see the `talks` collection in src/content.config.ts):
+#   id       unique slug
+#   date     ISO date "YYYY-MM-DD", or the literal "TODO" if not yet known
+#            (TODO-dated entries are shown under "Upcoming" until a real date is filled in)
+#   title    what was presented
+#   event    conference / venue name
+#   type     demo | talk | poster | keynote (omit if not yet decided)
+#   location city, or "TODO: city" if not yet known
+#   links    optional: slides, poster, video, photo, event (all URLs, omit if unavailable)
+#   project  slug of the project page this belongs to, e.g. "reflectimate"
+#
+# To add a new entry: copy one of the blocks below and edit the fields.
+# No page markup needs to change.
+
+- id: umap-2026-talk
+  date: '2026-06-11'
+  title: 'Reflecti-Mate: A Conversational Agent for Adaptive Decision-Making Support Through System 1 and System 2 Thinking'
+  event: UMAP 2026
+  type: talk
+  location: 'Gothenburg, Sweden'
+  project: reflectimate
+
+- id: interspeech-2025-demo
+  date: '2025-08-17'
+  title: Hands-on session with ReflectiMate
+  event: Speech Science Festival, Interspeech 2025
+  type: demo
+  location: 'Rotterdam, The Netherlands'
+  project: reflectimate
+
+- id: emnlp-2026-poster
+  date: '2026-10-27'
+  title: 'Why This and Not That? A Collaborative Reflection Approach for Understanding Thought Coverage in Decision Making Support Dialog'
+  event: EMNLP 2026 (Findings)
+  type: poster
+  location: 'Budapest, Hungary'
+  project: reflectimate
+
+- id: icai-exchange-2026-demo
+  date: '2026-11-17'
+  title: Hands-on session with ReflectiMate
+  event: ICAI Exchange
+  type: demo
+  location: 'Utrecht, The Netherlands'
+  project: reflectimate

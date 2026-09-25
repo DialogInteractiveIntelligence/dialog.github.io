@@ -11,7 +11,12 @@ const socials = [
   ['X', site.social.x],
   ['YouTube', site.social.youtube],
 ].filter(([, url]) => url) as [string, string][];
-const address = [site.address.street, [site.address.postalCode, site.address.city].filter(Boolean).join(' '), site.address.country].filter(Boolean);
+const address = [
+  site.address.building,
+  site.address.street,
+  [site.address.postalCode, site.address.city].filter(Boolean).join(' '),
+  site.address.country,
+].filter(Boolean);
 ---
 
 <footer class="site-footer">
@@ -34,14 +39,18 @@ const address = [site.address.street, [site.address.postalCode, site.address.cit
         {socials.map(([label, url]) => <li><a class="link" href={url} rel="me noopener">{label}</a></li>)}
       </ul>
     </div>
-    <div class="site-footer__col">
-      <p class="eyebrow">Follow</p>
-      <ul class="site-footer__links small">
-        <li><a class="link" href={href('/rss.xml')}>RSS feed</a></li>
-        <li><a class="link" href={href('/publications.bib')}>publications.bib</a></li>
-        <li><a class="link" href={href('/llms.txt')}>llms.txt</a></li>
-      </ul>
-    </div>
+    {
+      /*
+      <div class="site-footer__col">
+        <p class="eyebrow">Follow</p>
+        <ul class="site-footer__links small">
+          <li><a class="link" href={href('/rss.xml')}>RSS feed</a></li>
+          <li><a class="link" href={href('/publications.bib')}>publications.bib</a></li>
+          <li><a class="link" href={href('/llms.txt')}>llms.txt</a></li>
+        </ul>
+      </div>
+      */
+    }
   </div>
   <div class="container site-footer__meta small faint">
     <span>© {year} {site.name}</span>

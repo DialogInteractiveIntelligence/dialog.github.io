@@ -1,0 +1,574 @@
+---
+/**
+ * ReflectiMate: a research programme page (not a single-paper page), part of
+ * the Hybrid Intelligence consortium. This is a bespoke page rather than a
+ * `projects` content-collection entry, since the generic project template
+ * (src/pages/projects/[slug].astro) doesn't fit a multi-paper programme with
+ * a papers timeline and a demos/talks calendar.
+ *
+ * To add a new paper: edit src/data/reflectimate-papers.ts.
+ * To add a new demo/talk entry: edit src/data/talks.yaml.
+ */
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import SectionHeading from '../../components/SectionHeading.astro';
+import CopyButton from '../../components/CopyButton.astro';
+import { href } from '../../lib/url';
+import { formatDate } from '../../lib/format';
+import { breadcrumbJsonLd } from '../../lib/seo';
+import { reflectimatePapers } from '../../data/reflectimate-papers';
+import study1UmapFigure from '../../assets/projects/reflectimate/study1-umap.png';
+import study2EmnlpFigure from '../../assets/projects/reflectimate/study2-emnlp.png';
+
+const title = 'ReflectiMate';
+const tagline =
+  'A hybrid intelligence approach to thinking through big life decisions. ReflectiMate is a thinking assistant that asks rather than advises. It brings awareness of how your thoughts are structured, and you bring the reasons behind them, so the thinking and the decision stay yours.';
+// const thread =
+//   'Study 1 gave the agent a model of how a person spreads attention across different kinds of considerations. Study 2 opened the moments where the agent would silently redirect the conversation, so that the agent contributes structural awareness and the person contributes the reasons behind the pattern.';
+// const description =
+//   'ReflectiMate is a conversational agent that supports reflection before big life decisions. It tracks which kinds of considerations a person has explored and, at collaborative moments, asks the person to interpret what it observed.';
+
+/**
+ * One entry per published study: problem, how it works, takeaways.
+ * Wording and numbers follow the camera-ready papers. Keep them scoped as in
+ * the papers. Unpublished (under review) work is deliberately NOT described.
+ */
+const studies = [
+  {
+    id: 'study-integration',
+    stage: 'Study 1',
+    venue: 'UMAP 2026',
+    title: 'Adapting to how a person reflects',
+    problem:
+      'Big life decisions involve cognitive, emotional and intuitive thinking, and people differ in how they spread their attention across these. Drawing on several sources of judgment is associated with better decisions. However, most decision-support systems focus on cognitive reasoning, and LLM agents usually generate follow-up questions from the conversation history alone, without a model of the person’s reflection.',
+    how:
+      'ReflectiMate builds a knowledge base of the person’s thoughts, starting from what they wrote before the conversation. Each thought is labelled internal (feelings, personal values), external (situational constraints, other people, factual information) or experiential (past experiences, prior outcomes), and details that deepen it are attached as elaborations. A coverage indicator per category adds breadth (number of thoughts) and depth (number of elaborations). The agent redirects toward the least explored category with exploration questions and deepens underdeveloped thoughts with Socratic follow-ups. It asks questions and never gives advice. We compared it with a baseline agent that used the same language model and objectives but had no model of the person’s reflection, in a between-subjects study with 128 participants.',
+    figure: {
+      image: study1UmapFigure,
+      alt: 'A conversation in which ReflectiMate tracks internal, external and experiential thoughts in a reflection profile and chooses between exploration and follow-up questions.',
+      caption:
+        'ReflectiMate keeps a reflection profile of internal, external and experiential thoughts and uses it to choose between broadening and deepening questions. Adapted from Tarvirdians et al., UMAP 2026 (CC BY 4.0).',
+    },
+    takeaways: [
+      {
+        point: 'Good instructions are not enough.',
+        detail: 'An agent with the same language model and the same goals, but no model of the person’s reflection, pushed everyone toward analytical thinking.',
+      },
+      {
+        point: 'Broaden without flattening.',
+        detail: 'With ReflectiMate, people typically kept their own dominant way of thinking and added the ones they used less, instead of all converging on one style.',
+      },
+      {
+        point: 'People noticed the difference.',
+        detail: 'More participants said ReflectiMate helped them bring head, heart and gut together. Both agents helped people elaborate equally well.',
+      },
+],
+  },
+  {
+    id: 'study-interpretive-gap',
+    stage: 'Study 2',
+    venue: 'EMNLP 2026 Findings',
+    title: 'Asking why before redirecting',
+    problem:
+      'Adaptive agents map what they observe to an action. ReflectiMate, for example, reads high coverage in one category as fixation and redirects the conversation. However, the same observable pattern can have different reasons. We call the gap between the pattern an agent observes and the person’s reason for it the interpretive gap.',
+    how:
+      'At each strategic decision moment, where ReflectiMate would normally redirect silently, a side panel opens. The agent shares what it has observed and the person answers three questions. First, recognition: do you recognise this pattern? Second, interpretation: why might that be? Third, decision: what would you like to explore next? The agent never reveals its own default choice. We studied 232 of these collaborative moments with 62 participants across 13 decision topics.',
+    figure: {
+      image: study2EmnlpFigure,
+      alt: 'The main conversation pauses and a side panel shows the agent’s observation, followed by three steps: recognition, interpretation and decision.',
+      caption:
+        'At a strategic decision moment, the agent surfaces its observation and the person recognises, interprets and decides before the conversation resumes. Adapted from Tarvirdians et al., EMNLP 2026 Findings.',
+    },
+    takeaways: [
+      {
+        point: 'Same pattern, different reasons.',
+        detail: 'A focus that looks identical to the agent can be a deliberate choice for one person, an emotion for another and a thinking habit for a third. The agent cannot tell them apart. The person can.',
+      },
+      {
+        point: 'People can say why.',
+        detail: 'Most people recognised the pattern the agent showed them and could explain it in their own words.',
+      },
+      {
+        point: 'Disagreeing on direction, not on exploring.',
+        detail: 'People often chose a different direction than the agent would have. However, most still chose to move beyond the aspect they had focused on so far.',
+      },
+    ],
+  },
+];
+
+const TALK_TYPE_LABELS: Record<string, string> = {
+  demo: 'Demo',
+  talk: 'Talk',
+  poster: 'Poster',
+  keynote: 'Keynote',
+};
+
+const allTalks = await getCollection('talks', ({ data }) => data.project === 'reflectimate');
+
+function parseTalkDate(raw: string): Date | undefined {
+  if (raw === 'TODO') return undefined;
+  const parsed = new Date(raw);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
+// Start of today, so an event happening today still counts as upcoming.
+// NOTE: this is evaluated at build time. Rebuild the site after each event
+// (or on a schedule) so entries move from Upcoming to Past.
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const talks = allTalks
+  .filter((entry) => !(import.meta.env.PROD && entry.data.date === 'TODO'))
+  .map((entry) => ({ entry, date: parseTalkDate(entry.data.date) }));
+
+const upcoming = talks
+  .filter(({ date }) => !date || date >= today)
+  .sort((a, b) => {
+    if (a.date && b.date) return a.date.getTime() - b.date.getTime();
+    if (a.date) return -1;
+    if (b.date) return 1;
+    return a.entry.data.event.localeCompare(b.entry.data.event);
+  });
+
+const past = talks
+  .filter(({ date }) => date && date < today)
+  .sort((a, b) => b.date!.getTime() - a.date!.getTime());
+
+const talkLinks = (links: (typeof allTalks)[number]['data']['links']) =>
+  [
+    links.slides && { label: 'Slides', url: links.slides },
+    links.poster && { label: 'Poster', url: links.poster },
+    links.video && { label: 'Video', url: links.video },
+    links.photo && { label: 'Photo', url: links.photo },
+    links.event && { label: 'Event page', url: links.event },
+  ].filter(Boolean) as { label: string; url: string }[];
+
+const paperLinks = (links: (typeof reflectimatePapers)[number]['links']) =>
+  [
+    links?.pdf && { label: 'PDF', url: links.pdf },
+    links?.arxiv && { label: 'arXiv', url: links.arxiv },
+    links?.code && { label: 'Code', url: links.code },
+  ].filter(Boolean) as { label: string; url: string }[];
+
+const jsonLd = [
+  breadcrumbJsonLd(
+    [
+      { name: 'Home', path: '/' },
+      { name: 'Projects', path: '/projects/' },
+      { name: title, path: '/projects/reflectimate/' },
+    ],
+    Astro.site,
+  ),
+];
+---
+
+<Base title={title} ogType="article" jsonLd={jsonLd}>
+  {/* TODO: pass a dedicated 1200x630 preview image once one exists; falls back to the site's default OG image for now. */}
+
+  <article class="container reflectimate">
+    <a class="arrow-link arrow-link--back" href={href('/projects/')}>Projects</a>
+
+    <!-- 1. Hero -->
+    <header class="hero">
+      <div class="hero__text">
+        <h1>{title}</h1>
+        <p class="lede">{tagline}</p>
+      </div>
+      {/* <figure class="hero__media placeholder-figure" aria-label="Demo video placeholder">
+        <div class="placeholder-figure__box" role="img" aria-label="TODO: add a 20–40 second demo video or GIF of ReflectiMate in action.">
+          <span class="placeholder-figure__icon" aria-hidden="true">▶</span>
+          <span class="placeholder-figure__text">TODO: 20–40s demo video or GIF</span>
+        </div>
+      </figure> */}
+    </header>
+
+    <!-- 2. Studies: problem, how it works, takeaways for each published study -->
+    {
+      studies.map((study) => (
+        <section class="section study" aria-labelledby={`${study.id}-heading`}>
+          <SectionHeading eyebrow={`${study.stage}, ${study.venue}`} title={study.title} id={`${study.id}-heading`} />
+          <div class="study__body">
+            <div class="study__text">
+              <h3 class="study__subhead">The problem</h3>
+              <p class="prose measure">{study.problem}</p>
+              <h3 class="study__subhead">How it works</h3>
+              <p class="prose measure">{study.how}</p>
+            </div>
+            <figure class="study__figure">
+              <Image src={study.figure.image} alt={study.figure.alt} widths={[400, 800, 1200]} sizes="(min-width: 48rem) 22rem, 100vw" />
+              <figcaption class="small muted">{study.figure.caption}</figcaption>
+            </figure>
+          </div>
+          <h3 class="study__subhead">Takeaways</h3>
+          <ul class="takeaways">
+            {study.takeaways.map((t) => (
+              <li class="takeaways__item">
+                <strong class="takeaways__point">{t.point}</strong> {t.detail}
+              </li>
+            ))}
+          </ul>
+          <p class="small muted">
+            Please find the methodology and details in the <a class="link" href="#papers-heading">paper</a>.
+          </p>
+        </section>
+      ))
+    }
+
+    <!-- 5. Papers -->
+    <section class="section" aria-labelledby="papers-heading">
+      <SectionHeading eyebrow="Papers" title="Timeline" id="papers-heading" />
+      <ol class="paper-timeline">
+        {
+          reflectimatePapers.map((paper) => (
+            <li class="paper-card">
+              <p class="paper-card__meta small muted">
+                <cite>{paper.venue}</cite> · {paper.year}
+              </p>
+              <h3 class="paper-card__title">{paper.title}</h3>
+              <p class:list={['paper-card__contribution', { 'todo-text': !paper.contribution }]}>{paper.contribution ?? 'TODO: one-sentence contribution, written by Morita.'}</p>
+              {(paperLinks(paper.links).length > 0 || paper.bibtex) && (
+                <div class="paper-card__links">
+                  {paperLinks(paper.links).map((l) => (
+                    <a class="pill" href={l.url} rel="noopener">
+                      {l.label}
+                    </a>
+                  ))}
+                  {paper.bibtex && <CopyButton text={paper.bibtex} />}
+                </div>
+              )}
+            </li>
+          ))
+        }
+        <li class="paper-card paper-card--more">
+          <p class="small muted">More papers will be added here as they come out.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- 6. Demos & Talks -->
+    <section class="section" aria-labelledby="talks-heading">
+      <SectionHeading eyebrow="Demos & talks" title="Where to see it" id="talks-heading" />
+
+      <div class="talk-groups">
+        <div class="talk-group" aria-labelledby="talks-upcoming">
+          <h3 id="talks-upcoming" class="talk-group__title">Upcoming</h3>
+          {
+            upcoming.length > 0 ? (
+              <ul class="talk-list">
+                {upcoming.map(({ entry, date }) => (
+                  <li class="talk-item">
+                    <p class="talk-item__date small muted">{date ? formatDate(date) : 'Date TBC'}</p>
+                    <div class="talk-item__body">
+                      <p class="talk-item__title">
+                        {entry.data.type && <span class="tag talk-item__type">{TALK_TYPE_LABELS[entry.data.type]}</span>}
+                        {entry.data.title}
+                      </p>
+                      <p class="small muted">
+                        {entry.data.event}
+                        {entry.data.location && ` · ${entry.data.location}`}
+                      </p>
+                      {talkLinks(entry.data.links).length > 0 && (
+                        <div class="talk-item__links">
+                          {talkLinks(entry.data.links).map((l) => (
+                            <a class="pill" href={l.url} rel="noopener">
+                              {l.label}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="small muted">No upcoming appearances scheduled.</p>
+            )
+          }
+        </div>
+
+        <div class="talk-group" aria-labelledby="talks-past">
+          <h3 id="talks-past" class="talk-group__title">Past</h3>
+          {
+            past.length > 0 ? (
+              <ul class="talk-list">
+                {past.map(({ entry, date }) => (
+                  <li class="talk-item">
+                    <p class="talk-item__date small muted">{date && formatDate(date)}</p>
+                    <div class="talk-item__body">
+                      <p class="talk-item__title">
+                        {entry.data.type && <span class="tag talk-item__type">{TALK_TYPE_LABELS[entry.data.type]}</span>}
+                        {entry.data.title}
+                      </p>
+                      <p class="small muted">
+                        {entry.data.event}
+                        {entry.data.location && ` · ${entry.data.location}`}
+                      </p>
+                      {talkLinks(entry.data.links).length > 0 && (
+                        <div class="talk-item__links">
+                          {talkLinks(entry.data.links).map((l) => (
+                            <a class="pill" href={l.url} rel="noopener">
+                              {l.label}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="small muted">No past appearances yet.</p>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. People & acknowledgements -->
+    <section class="section" aria-labelledby="people-heading">
+      <SectionHeading eyebrow="People" title="Who's behind it" id="people-heading" />
+      <dl class="people-list">
+        <div class="people-list__row">
+          <dt class="faint">Lead</dt>
+          <dd>Morita Tarvirdians</dd>
+        </div>
+        <div class="people-list__row">
+          <dt class="faint">Supervisors</dt>
+          <dd>Catharine Oertel, Hayley Hung, Catholijn M. Jonker</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- 8. Contact -->
+    <section class="section" aria-labelledby="contact-heading">
+      <SectionHeading eyebrow="Contact" title="Get in touch" id="contact-heading" />
+      <p class="lede measure">
+        Questions about ReflectiMate? Reach out via
+        {' '}<a class="link" href="mailto:m.tarvirdians@tudelft.nl">email</a>.
+      </p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .reflectimate {
+    padding-top: var(--space-l);
+  }
+  .arrow-link--back::after {
+    content: none;
+  }
+  .arrow-link--back::before {
+    content: '←';
+    margin-right: 0.35em;
+  }
+
+  /* Hero */
+  .hero {
+    display: grid;
+    gap: var(--space-l);
+    margin-block: var(--space-l) var(--space-xl);
+  }
+  .hero__text {
+    display: grid;
+    gap: var(--space-s);
+  }
+  .hero__text h1 {
+    font-size: var(--step-4);
+  }
+  .hero__media {
+    margin: 0;
+    aspect-ratio: 21 / 9;
+  }
+
+  /* Placeholder figures */
+  .placeholder-figure {
+    margin: 0;
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .placeholder-figure__box {
+    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    gap: var(--space-xs);
+    background: var(--paper-2);
+    border: 1px dashed var(--line-strong);
+    border-radius: var(--radius-lg);
+    color: var(--ink-3);
+    text-align: center;
+    padding: var(--space-m);
+  }
+  .hero__media .placeholder-figure__box {
+    aspect-ratio: auto;
+    width: 100%;
+    height: 100%;
+  }
+  .placeholder-figure__icon {
+    font-size: 1.5rem;
+  }
+  .placeholder-figure__text {
+    font-size: var(--step--1);
+    font-weight: 500;
+  }
+  .todo-text {
+    color: var(--ink-3);
+    font-style: italic;
+  }
+
+  /* Studies */
+  .study__body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-l);
+    align-items: start;
+  }
+  .study__text {
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .study__subhead {
+    font-size: var(--step-0);
+    font-weight: 600;
+    margin-top: var(--space-s);
+  }
+  .study__figure {
+    margin: 0;
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .study__figure img {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--paper-2);
+  }
+  .takeaways {
+    display: grid;
+    gap: var(--space-xs);
+    max-width: var(--measure);
+    padding-left: 1.2em;
+    margin-top: var(--space-xs);
+  }
+  .takeaways__item {
+    line-height: 1.5;
+  }
+  .takeaways__point {
+    font-weight: 600;
+  }
+
+  /* Papers timeline */
+  .paper-timeline {
+    list-style: none;
+    display: grid;
+    gap: var(--space-m);
+    border-left: 2px solid var(--line);
+    padding-left: var(--space-l);
+  }
+  .paper-card {
+    position: relative;
+    display: grid;
+    gap: 0.35rem;
+    padding-block: var(--space-xs);
+  }
+  .paper-card::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--space-l) - 5px);
+    top: 0.4rem;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--accent);
+  }
+  .paper-card--more::before {
+    background: var(--line-strong);
+  }
+  .paper-card__title {
+    font-size: var(--step-1);
+  }
+  .paper-card__contribution {
+    max-width: var(--measure);
+  }
+  .paper-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+  }
+
+  /* Demos & talks */
+  .talk-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: var(--space-xl);
+  }
+  .talk-group__title {
+    font-size: var(--step-1);
+    margin-bottom: var(--space-m);
+  }
+  .talk-list {
+    list-style: none;
+    display: grid;
+    gap: var(--space-m);
+  }
+  .talk-item {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: var(--space-s);
+  }
+  .talk-item__date {
+    font-variant-numeric: tabular-nums;
+  }
+  .talk-item__body {
+    display: grid;
+    gap: 0.2rem;
+  }
+  .talk-item__title {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+  .talk-item__type {
+    color: var(--accent);
+  }
+  .talk-item__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.3rem;
+  }
+
+  /* People */
+  .people-list {
+    display: grid;
+    gap: var(--space-s);
+    max-width: var(--measure);
+  }
+  .people-list__row {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    gap: var(--space-m);
+  }
+  .people-list__row dt {
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .people-list__row dd {
+    margin: 0;
+  }
+
+  @media (max-width: 40em) {
+    .talk-item {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+    .people-list__row {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+  }
+</style>
