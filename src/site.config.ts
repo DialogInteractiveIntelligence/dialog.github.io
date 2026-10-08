@@ -13,7 +13,7 @@ export const site = {
   tagline: 'A research group studying dialogue, interaction, and intelligent systems that collaborate with people.',
   /** Two or three sentences of introduction shown on the homepage. Plain text or simple HTML. */
   about:
-    'We build and study interactive intelligent systems: how they understand people, how people understand them, and how the two adapt to each other over time. Our work combines machine learning, human–computer interaction, and empirical studies with real users.',
+    'In the Dialogue Group, we study how people and AI think together through dialogue. What people say is only part of what shapes collaboration: perspectives, values, agency, and memory often remain partly hidden.\n\nWe develop computational methods to model how these underlying processes evolve in human–AI and group interaction, and use them to design systems that support reflection, creativity, and shared understanding. Our work spans fundamental research and applications from education, civic participation to healthcare.',
 
   /** Parent institution, used in the footer and as `parentOrganization` in JSON-LD. */
   institution: {

@@ -43,7 +43,9 @@ const projects = (await getCollection('projects'))
 
   <section class="section container about">
     <p class="eyebrow">About the group</p>
-    <p class="about__text measure" set:html={site.about} />
+    <div class="about__text measure">
+      {site.about.split('\n\n').map((paragraph) => <p set:html={paragraph} />)}
+    </div>
     <p class="about__inst small muted">{site.institution.name}</p>
   </section>
 
@@ -134,6 +136,9 @@ const projects = (await getCollection('projects'))
     font-weight: 400;
     font-variation-settings: 'opsz' 18, 'SOFT' 0;
     text-wrap: pretty;
+  }
+  .about__text p + p {
+    margin-top: var(--space-m);
   }
   @media (max-width: 40em) {
     .hero__photo {
