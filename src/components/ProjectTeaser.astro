@@ -1,0 +1,37 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { href } from '../lib/url';
+interface Props { title: string; path: string; summary: string; image: ImageMetadata; imageAlt: string; }
+const { title, path, summary, image, imageAlt } = Astro.props;
+---
+
+<article class="project-teaser">
+  <a class="project-teaser__image" href={href(path)} aria-label={`View ${title}`}>
+    <Image src={image} widths={[360, 720]} sizes="(min-width: 48em) 16rem, 88vw" alt={imageAlt} />
+  </a>
+  <div class="project-teaser__text">
+    <h2><a href={href(path)}>{title}</a></h2>
+    <p class="muted">{summary}</p>
+  </div>
+</article>
+
+<style>
+  .project-teaser {
+    display: grid;
+    grid-template-columns: 16rem minmax(0, 1fr);
+    gap: var(--space-m);
+    align-items: center;
+    padding: var(--space-m);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    background: var(--paper-2);
+  }
+  .project-teaser__image { display: block; border-radius: var(--radius); overflow: hidden; background: #fff; }
+  .project-teaser__image img { display: block; width: 100%; height: auto; }
+  .project-teaser__text { display: grid; gap: var(--space-xs); }
+  h2 { font-size: var(--step-2); }
+  h2 a:hover { color: var(--accent); }
+  p { line-height: 1.5; max-width: 60ch; text-wrap: pretty; }
+  @media (max-width: 48em) { .project-teaser { grid-template-columns: 1fr; } }
+</style>

@@ -14,9 +14,9 @@
   --accent-soft: rgba(65, 106, 102, 0.1);
   --on-accent: #ffffff;
 
-  --font-display: 'Fraunces Variable', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
-  --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --font-display: Arial, sans-serif;
+  --font-body: Arial, sans-serif;
+  --font-mono: Arial, sans-serif;
 
   --measure: 66ch;
   --container: 72rem;

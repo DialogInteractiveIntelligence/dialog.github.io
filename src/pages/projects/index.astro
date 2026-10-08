@@ -1,76 +1,29 @@
 ---
-import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
-import SectionHeading from '../../components/SectionHeading.astro';
-import UnderConstruction from '../../components/UnderConstruction.astro';
-import { site } from '../../site.config';
-import { href } from '../../lib/url';
+import ProjectTeaser from '../../components/ProjectTeaser.astro';
 import { breadcrumbJsonLd, collectionPageJsonLd } from '../../lib/seo';
+import reflectimateImage from '../../assets/projects/reflectimate/study2-emnlp.png';
+import bubbleBoardImage from '../../assets/projects/bubble-board/bubble-board.png';
 
-const people = await getCollection('people');
-const all = (await getCollection('projects')).sort(
-  (a, b) => Number(b.data.featured) - Number(a.data.featured) || (a.data.order ?? 999) - (b.data.order ?? 999) || a.data.title.localeCompare(b.data.title),
-);
-const active = all.filter((p) => p.data.status === 'active');
-const finished = all.filter((p) => p.data.status === 'finished');
-
-const description = `Research projects at ${site.name}: what we work on, who is involved, and what came out of it.`;
+const projects = [
+  { title: 'ReflectiMate', path: '/projects/reflectimate/', summary: 'A research project on collaborative reflection: helping people see the coverage of their own reasoning in decision-support dialogue.', image: reflectimateImage, imageAlt: 'Diagram of the ReflectiMate collaborative reflection study' },
+  { title: 'Bubble board', path: '/projects/bubble-board/', summary: 'Interactive touch-table software designed to support collaborative group activities', image: bubbleBoardImage, imageAlt: 'Bubble Board illustration showing people collaborating around a shared touch-table' },
+];
+const description = 'Explore the dialogue and Hybrid Intelligence research projects at DIALOG.';
 const jsonLd = [
   breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'Projects', path: '/projects/' }], Astro.site),
-  collectionPageJsonLd('Projects', description, '/projects/', Astro.site, all.map((p) => ({ name: p.data.title, path: `/projects/${p.id}/` }))),
+  collectionPageJsonLd('Projects', description, '/projects/', Astro.site, projects.map((p) => ({ name: p.title, path: p.path }))),
 ];
 ---
 
 <Base title="Projects" description={description} jsonLd={jsonLd}>
-  <PageHeader eyebrow="What we do" title="Projects" lede={description} />
-
-  <div class="container">
-    <section class="section featured-project">
-      <SectionHeading eyebrow="Featured" title="ReflectiMate" href={href('/projects/reflectimate/')} linkLabel="Read more" />
-      <p class="lede measure">
-        A research project on collaborative reflection: helping people see the coverage of their own reasoning in
-        decision-support dialogue.
-      </p>
-      <a class="pill pill--accent" href={href('/projects/reflectimate/')}>Visit the ReflectiMate page</a>
-    </section>
-
-    {
-      /*
-      <section class="section">
-        <div class="grid grid--3">
-          {active.map((project, i) => <ProjectCard project={project} people={people} loading={i < 3 ? 'eager' : 'lazy'} />)}
-        </div>
-      </section>
-
-      finished.length > 0 && (
-        <section class="section">
-          <h2 class="finished-title">Finished projects</h2>
-          <div class="grid grid--3">
-            {finished.map((project) => (
-              <ProjectCard project={project} people={people} />
-            ))}
-          </div>
-        </section>
-      )
-      */
-    }
+  <PageHeader title="Projects" />
+  <div class="container project-list">
+    {projects.map((project) => <ProjectTeaser {...project} />)}
   </div>
-  <UnderConstruction />
 </Base>
 
 <style>
-  .section:first-child {
-    padding-top: 0;
-  }
-  .featured-project {
-    display: grid;
-    gap: var(--space-m);
-    align-items: start;
-  }
-  .finished-title {
-    font-size: var(--step-2);
-    margin-bottom: var(--space-l);
-  }
+  .project-list { display: grid; gap: var(--space-m); padding-bottom: var(--space-xl); }
 </style>

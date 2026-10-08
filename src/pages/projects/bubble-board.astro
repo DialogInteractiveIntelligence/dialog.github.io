@@ -1,0 +1,31 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { href } from '../../lib/url';
+import { breadcrumbJsonLd } from '../../lib/seo';
+import bubbleBoardImage from '../../assets/projects/bubble-board/bubble-board.png';
+const title = 'Bubble board';
+const description = 'Interactive touch-table software designed to support collaborative group activities';
+const jsonLd = [breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'Projects', path: '/projects/' }, { name: title, path: '/projects/bubble-board/' }], Astro.site)];
+---
+
+<Base title={title} description={description} jsonLd={jsonLd}>
+  <PageHeader title={title} />
+  <article class="container bubble-board">
+    <a class="back-link" href={href('/projects/')}>← Projects</a>
+    <figure>
+      <Image src={bubbleBoardImage} widths={[720, 1200, 1800]} sizes="(min-width: 60em) 56rem, 92vw" alt="Bubble Board illustration showing people collaborating around a shared touch-table" loading="eager" />
+    </figure>
+    <div class="prose">
+      <p>The Bubble Board is envisioned as a modular platform for dialogue-based Hybrid Intelligence. It is an interactive touch-table designed to support collaborative group activities, such as brainstorming, reflection, and group decision-making through dialogue. The current system captures spoken discussion, extracts ideas, and displays them as editable bubbles on a shared interface. Crucially, the Bubble Board is not intended as a stand-alone application, but as a platform to which further modules can be added, such as knowledge-graph reasoning, value annotation, reinforcement-learning-based idea structuring, or links to VR and other interaction environments</p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .bubble-board { display: grid; gap: var(--space-l); padding-bottom: var(--space-xl); }
+  .back-link { justify-self: start; }
+  figure { margin: 0; max-width: 56rem; }
+  figure img { display: block; width: 100%; height: auto; border-radius: var(--radius-lg); }
+</style>
