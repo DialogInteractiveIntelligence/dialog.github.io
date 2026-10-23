@@ -24,12 +24,12 @@ const paperHref = doiHref ?? d.url ?? href(`/publications/${pub.id}/`);
 
 <article class:list={['pub', { 'pub--compact': compact, 'pub--illustrated': d.image && !compact }]} id={pub.id}>
   {d.image && !compact && (
-    <a class="thumb pub__thumb" href={paperHref} aria-hidden="true" tabindex="-1">
+    <a class="thumb pub__thumb" href={paperHref} target="_blank" rel="noopener noreferrer" aria-hidden="true" tabindex="-1">
         <Image src={d.image} width={320} height={240} widths={[320, 640]} sizes="(min-width: 40em) 160px, 25vw" alt="" loading={loading} />
     </a>
   )}
   <div class="pub__body">
-    <h3 class="pub__title"><a href={paperHref}>{d.title}</a></h3>
+    <h3 class="pub__title"><a href={paperHref} target="_blank" rel="noopener noreferrer">{d.title}</a></h3>
     {!compact && <p class="pub__authors"><Authors authors={d.authors} people={people} highlight={highlight} /></p>}
     <p class="pub__venue small muted">
       {d.venue && <cite>{d.venue}</cite>}
@@ -37,7 +37,7 @@ const paperHref = doiHref ?? d.url ?? href(`/publications/${pub.id}/`);
       {!d.venue && <span>{d.typeLabel}</span>}
     </p>
     <div class="pub__links">
-      {doiHref && <a class="pub__doi" href={doiHref}>DOI</a>}
+      {doiHref && <a class="pub__doi" href={doiHref} target="_blank" rel="noopener noreferrer">DOI</a>}
       {!compact && <CopyButton text={d.bibtex} />}
     </div>
     <time class="pub__date small muted" datetime={date.iso}>{date.label}</time>
