@@ -2,6 +2,7 @@
 name: Manuel Valle Torre
 role: alumni
 title: PhD alumnus
+photo: ../../assets/people/manuel.jpg
 interests:
   - Learning analytics
   - AI in education

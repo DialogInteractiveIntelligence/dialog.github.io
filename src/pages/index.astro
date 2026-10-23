@@ -34,7 +34,6 @@ const projects = (await getCollection('projects'))
       />
     </figure>
     <div class="hero__text">
-      <h1 class="hero__title">{site.name}</h1>
       <p class="hero__tagline lede">{site.tagline}</p>
     </div>
   </section>
@@ -105,7 +104,9 @@ const projects = (await getCollection('projects'))
     margin: 0;
     aspect-ratio: 21 / 9;
     border-radius: var(--radius-lg);
-    background: #171716;
+    background: #ffffff;
+    display: grid;
+    place-items: center;
     overflow: hidden;
   }
   .hero__wordmark {
@@ -113,14 +114,11 @@ const projects = (await getCollection('projects'))
     height: 100%;
     object-fit: contain;
     padding: clamp(1.5rem, 5vw, 4rem);
+    transform: scale(0.75);
   }
   .hero__text {
     display: grid;
     gap: var(--space-s);
-  }
-  .hero__title {
-    font-size: var(--step-4);
-    font-weight: 500;
   }
   .hero__tagline {
     font-size: var(--step-1);

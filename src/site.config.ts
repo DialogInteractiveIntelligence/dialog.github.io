@@ -10,7 +10,7 @@ export const site = {
   /** Short name used in the header wordmark and "Page · Short" titles. */
   shortName: 'DIALOG',
   /** Browser tab title on the homepage and suffix on other pages. */
-  title: 'DIALOG GROUP',
+  title: 'DIALOG Group',
   /** One sentence shown under the group photo and used as the default meta description. */
   tagline: 'A research group studying dialogue, interaction, and intelligent systems that collaborate with people.',
   /** Two or three sentences of introduction shown on the homepage. Plain text or simple HTML. */
