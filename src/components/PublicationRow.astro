@@ -4,6 +4,7 @@ import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import Authors from './Authors.astro';
 import { href } from '../lib/url';
+import { publicationDate } from '../lib/format';
 
 interface Props {
   pub: CollectionEntry<'publications'>;
@@ -12,12 +13,16 @@ interface Props {
   /** Hide the year (when rows are already grouped by year). */
   hideYear?: boolean;
   loading?: 'lazy' | 'eager';
+  /** A short text-only entry for a person's publication list. */
+  compact?: boolean;
 }
-const { pub, people, highlight, hideYear = false, loading = 'lazy' } = Astro.props;
+const { pub, people, highlight, hideYear = false, loading = 'lazy', compact = false } = Astro.props;
 const d = pub.data;
+const date = publicationDate(d);
+const dateLabel = hideYear && d.month ? date.label.replace(/ \d{4}$/, '') : date.label;
 const pageHref = href(`/publications/${pub.id}/`);
 const links = [
-  d.pdf && { label: 'PDF', url: d.pdf },
+  d.pdf && { label: d.pdf.includes('arxiv.org') && d.type !== 'misc' ? 'Preprint PDF' : 'PDF', url: d.pdf },
   d.doi && { label: 'DOI', url: `https://doi.org/${d.doi}` },
   !d.doi && d.url && { label: 'Link', url: d.url },
   d.code && { label: 'Code', url: d.code },
@@ -27,31 +32,28 @@ const links = [
 ].filter(Boolean) as { label: string; url: string }[];
 ---
 
-<article class="pub" id={pub.id}>
-  <a class="thumb pub__thumb" href={pageHref} aria-hidden="true" tabindex="-1">
-    {
-      d.image ? (
+<article class:list={['pub', { 'pub--compact': compact, 'pub--illustrated': d.image && !compact }]} id={pub.id}>
+  {compact && <time class="pub__date small muted" datetime={date.iso}>{date.label}</time>}
+  {d.image && !compact && (
+    <a class="thumb pub__thumb" href={pageHref} aria-hidden="true" tabindex="-1">
         <Image src={d.image} width={320} height={240} widths={[320, 640]} sizes="(min-width: 40em) 160px, 25vw" alt="" loading={loading} />
-      ) : (
-        <span class="pub__thumb-fallback" aria-hidden="true">{d.typeLabel}</span>
-      )
-    }
-  </a>
+    </a>
+  )}
   <div class="pub__body">
     <h3 class="pub__title"><a href={pageHref}>{d.title}</a></h3>
-    <p class="pub__authors"><Authors authors={d.authors} people={people} highlight={highlight} /></p>
+    {!compact && <p class="pub__authors"><Authors authors={d.authors} people={people} highlight={highlight} /></p>}
     <p class="pub__venue small muted">
       {d.venue && <cite>{d.venue}</cite>}
-      {d.venue && !hideYear && d.year && ', '}
-      {!hideYear && d.year && <span>{d.year}</span>}
-      {!d.venue && hideYear && <span>{d.typeLabel}</span>}
+      {!compact && (!hideYear || d.month) && <>{d.venue && ' · '}<time datetime={date.iso}>{dateLabel}</time></>}
+      {(d.type === 'misc' || d.type === 'unpublished') && <span class="pub__status"> · Preprint</span>}
+      {!d.venue && <span>{d.typeLabel}</span>}
     </p>
     <div class="pub__links">
       {links.map((l) => <a class="pill" href={l.url} rel={l.url.startsWith('http') ? 'noopener' : undefined}>{l.label}</a>)}
-      <details class="bibtex">
+      {!compact && <details class="bibtex">
         <summary class="pill">BibTeX</summary>
         <pre><code>{d.bibtex}</code></pre>
-      </details>
+      </details>}
     </div>
   </div>
 </article>
@@ -59,9 +61,20 @@ const links = [
 <style>
   .pub {
     display: grid;
-    grid-template-columns: 8rem 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-m) var(--space-l);
     padding-block: var(--space-m);
+  }
+  .pub--illustrated {
+    grid-template-columns: 8rem minmax(0, 1fr);
+  }
+  .pub--compact {
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: var(--space-m);
+  }
+  .pub__date {
+    padding-top: 0.1rem;
+    font-variant-numeric: tabular-nums;
   }
   .pub + .pub {
     border-top: 1px solid var(--line);
@@ -71,15 +84,6 @@ const links = [
     align-self: start;
     display: grid;
     place-items: center;
-  }
-  .pub__thumb-fallback {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    text-align: center;
-    padding: 0.5rem;
   }
   .pub__body {
     display: grid;

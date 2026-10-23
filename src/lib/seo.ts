@@ -5,6 +5,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { site } from '../site.config';
 import { absolute } from './url';
+import { publicationDate } from './format';
 
 type JsonLd = Record<string, unknown>;
 
@@ -150,7 +151,7 @@ export function publicationJsonLd(
       givenName: a.firstName || undefined,
       familyName: [a.prefix, a.lastName].filter(Boolean).join(' ') || undefined,
     })),
-    datePublished: d.year ? `${d.year}${d.month ? `-${String(d.month).padStart(2, '0')}` : ''}` : undefined,
+    datePublished: publicationDate(d).iso,
     isPartOf,
     pagination: d.pages,
     publisher: d.publisher ? { '@type': 'Organization', name: d.publisher } : undefined,
@@ -227,7 +228,7 @@ export function citationMeta(pub: CollectionEntry<'publications'>, siteUrl: URL 
   };
   push('citation_title', d.title);
   for (const a of d.authors) push('citation_author', a.name);
-  if (d.year) push('citation_publication_date', d.month ? `${d.year}/${d.month}` : String(d.year));
+  push('citation_publication_date', publicationDate(d).iso?.replaceAll('-', '/'));
   if (d.type === 'article') push('citation_journal_title', d.venue);
   else if (d.type === 'inproceedings' || d.type === 'conference') push('citation_conference_title', d.venue);
   else if (d.type === 'incollection' || d.type === 'inbook') push('citation_inbook_title', d.venue);

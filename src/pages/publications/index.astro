@@ -3,9 +3,7 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import PublicationRow from '../../components/PublicationRow.astro';
-import UnderConstruction from '../../components/UnderConstruction.astro';
 import { site } from '../../site.config';
-import { href } from '../../lib/url';
 import { sortPublications } from '../../lib/people';
 import { breadcrumbJsonLd, collectionPageJsonLd } from '../../lib/seo';
 
@@ -18,7 +16,7 @@ for (const pub of publications) {
   byYear.set(y, [...(byYear.get(y) ?? []), pub]);
 }
 
-const description = `Publications by ${site.name}, grouped by year, with PDFs, code and BibTeX.`;
+const description = `Publications by ${site.name}, newest first, with official paper links, DOIs and BibTeX.`;
 const jsonLd = [
   breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'Publications', path: '/publications/' }], Astro.site),
   collectionPageJsonLd('Publications', description, '/publications/', Astro.site, publications.map((p) => ({ name: p.data.title, path: `/publications/${p.id}/` }))),
@@ -26,19 +24,10 @@ const jsonLd = [
 ---
 
 <Base title="Publications" description={description} jsonLd={jsonLd}>
-  <PageHeader eyebrow="What we wrote" title="Publications" lede={description}>
-    {
-      /*
-      <p class="small faint">
-        <a class="link" href={href('/publications.bib')}>Download all as BibTeX</a>
-      </p>
-      */
-    }
-  </PageHeader>
+  <PageHeader title="Publications" />
 
   <div class="container">
     {
-      /*
       [...byYear.entries()].map(([year, pubs], i) => (
         <section class="year" aria-labelledby={`year-${year}`}>
           <h2 id={`year-${year}`} class="year__label">{year}</h2>
@@ -49,10 +38,8 @@ const jsonLd = [
           </div>
         </section>
       ))
-      */
     }
   </div>
-  <UnderConstruction />
 </Base>
 
 <style>

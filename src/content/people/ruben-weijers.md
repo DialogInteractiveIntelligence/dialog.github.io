@@ -7,6 +7,7 @@ interests:
   - Human-Robot Interaction
   - Agency
 links:
+  scholar: https://scholar.google.com/citations?user=ns-rMmUAAAAJ&hl=en
   linkedin: https://nl.linkedin.com/in/ruben-weijers
 ---
 

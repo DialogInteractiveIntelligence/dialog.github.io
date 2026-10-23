@@ -26,7 +26,9 @@ const people = await getCollection('people');
 const projects = (await getCollection('projects'))
   .filter((p) => p.data.people.includes(person.id))
   .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999));
-const publications = sortPublications(publicationsOf(person, await getCollection('publications')));
+const publications = d.showPublications
+  ? sortPublications(publicationsOf(person, await getCollection('publications')))
+  : [];
 const news = (await getCollection('news', ({ data }) => !data.draft && data.people.includes(person.id)))
   .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
   .slice(0, 5);
@@ -119,12 +121,12 @@ const jsonLd = [
     }
 
     {
-      publications.length > 0 && (
+      news.length > 0 && (
         <section class="section">
-          <SectionHeading title="Publications" href={href('/publications/')} linkLabel="All group publications" />
+          <SectionHeading title="News" href={href('/news/')} linkLabel="All news" />
           <div>
-            {publications.map((pub) => (
-              <PublicationRow pub={pub} people={people} highlight={person.id} />
+            {news.map((post) => (
+              <NewsItem post={post} compact />
             ))}
           </div>
         </section>
@@ -132,12 +134,12 @@ const jsonLd = [
     }
 
     {
-      news.length > 0 && (
+      publications.length > 0 && (
         <section class="section">
-          <SectionHeading title="News" href={href('/news/')} linkLabel="All news" />
+          <SectionHeading title="Publications" href={href('/publications/')} linkLabel="All group publications" />
           <div>
-            {news.map((post) => (
-              <NewsItem post={post} compact />
+            {publications.map((pub) => (
+              <PublicationRow pub={pub} people={people} highlight={person.id} compact />
             ))}
           </div>
         </section>

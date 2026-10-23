@@ -94,8 +94,11 @@ Add an entry to `src/data/publications.bib`. Standard fields are used for the ci
 | `selected = {true}` | Show on the homepage |
 | `project = {slug}` | Link to a project |
 | `abstract` | Shown on the paper page |
+| `year`, `month`, `day` | Publication date; omit unknown parts instead of inventing precision |
 
 Each entry gets its own page at `/publications/<bibkey>/` with Google Scholar meta tags and JSON-LD. The whole file is served at `/publications.bib`.
+
+The publication list and each person's matching publications are sorted newest first by year, month and day. Person pages show a compact list at the bottom; set `showPublications: false` in a person's frontmatter to omit it. Sources and inclusion decisions for the current bibliography are recorded in `src/data/publications-sources.md`.
 
 ### A news post
 

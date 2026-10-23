@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { Image, getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Authors from '../../components/Authors.astro';
-import UnderConstruction from '../../components/UnderConstruction.astro';
+import { publicationDate } from '../../lib/format';
 import { href } from '../../lib/url';
 import { breadcrumbJsonLd, citationMeta, publicationJsonLd } from '../../lib/seo';
 
@@ -14,12 +14,13 @@ export async function getStaticPaths() {
 
 const { pub } = Astro.props;
 const d = pub.data;
+const date = publicationDate(d);
 const people = await getCollection('people');
 const project = d.project ? (await getCollection('projects')).find((p) => p.id === d.project) : undefined;
 
 const og = d.image ? await getImage({ src: d.image, width: 1200, height: 630, format: 'jpg' }) : undefined;
 const links = [
-  d.pdf && { label: 'PDF', url: d.pdf },
+  d.pdf && { label: d.pdf.includes('arxiv.org') && d.type !== 'misc' ? 'Preprint PDF' : 'PDF', url: d.pdf },
   d.doi && { label: 'DOI', url: `https://doi.org/${d.doi}` },
   d.url && (!d.doi || !d.url.includes('doi.org')) && { label: 'Publisher', url: d.url },
   d.code && { label: 'Code', url: d.code },
@@ -55,11 +56,9 @@ const meta = citationMeta(pub, Astro.site);
   <article class="container paper">
     <a class="arrow-link arrow-link--back" href={href('/publications/')}>Publications</a>
 
-    {
-      /*
       <header class="paper__header">
         <div class="paper__intro">
-          <p class="eyebrow">{d.typeLabel}{d.year && ` · ${d.year}`}</p>
+          <p class="eyebrow">{d.typeLabel} · <time datetime={date.iso}>{date.label}</time></p>
           <h1>{d.title}</h1>
           <p class="paper__authors"><Authors authors={d.authors} people={people} /></p>
           {
@@ -110,9 +109,6 @@ const meta = citationMeta(pub, Astro.site);
           </section>
         )
       }
-      */
-    }
-    <UnderConstruction message={`This publication page is under construction. Please check back soon.`} />
   </article>
 </Base>
 
@@ -129,7 +125,7 @@ const meta = citationMeta(pub, Astro.site);
   }
   .paper__header {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem);
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-xl);
     align-items: start;
     margin-block: var(--space-l) var(--space-xl);

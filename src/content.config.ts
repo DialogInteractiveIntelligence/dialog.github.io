@@ -39,6 +39,8 @@ const people = defineCollection({
       interests: z.array(z.string()).default([]),
       /** Extra name spellings used in the .bib file, e.g. ["Weijers, R."]. */
       bibNames: z.array(z.string()).default([]),
+      /** Omit the publication section for members whose work spans the whole group. */
+      showPublications: z.boolean().default(true),
       links,
       /** Lower numbers appear first within a role group. */
       order: z.number().int().optional(),
@@ -138,6 +140,7 @@ const publications = defineCollection({
       ),
       year: z.number().int().optional(),
       month: z.number().int().optional(),
+      day: z.number().int().min(1).max(31).optional(),
       venue: z.string(),
       volume: z.string().optional(),
       number: z.string().optional(),

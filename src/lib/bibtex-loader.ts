@@ -125,6 +125,7 @@ export function bibtexLoader({ file }: BibtexLoaderOptions): Loader {
             editors: (f.editor ?? []).map(toAuthor),
             year: Number.isNaN(year) ? undefined : year,
             month: monthOf(f.month),
+            day: f.day ? Number.parseInt(f.day, 10) : undefined,
             venue: venueOf(entry),
             volume: f.volume,
             number: f.number,

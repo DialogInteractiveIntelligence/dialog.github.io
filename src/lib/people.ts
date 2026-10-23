@@ -97,7 +97,7 @@ export function sortPeople(people: Person[]): Person[] {
   });
 }
 
-/** Sort newest first: by year, then month, then title. */
+/** Sort newest first, retaining the date precision supplied by the source. */
 export function sortPublications(pubs: Publication[]): Publication[] {
   return [...pubs].sort((a, b) => {
     const ya = a.data.year ?? 0;
@@ -106,6 +106,9 @@ export function sortPublications(pubs: Publication[]): Publication[] {
     const ma = a.data.month ?? 0;
     const mb = b.data.month ?? 0;
     if (ma !== mb) return mb - ma;
+    const da = a.data.day ?? 0;
+    const db = b.data.day ?? 0;
+    if (da !== db) return db - da;
     return a.data.title.localeCompare(b.data.title);
   });
 }

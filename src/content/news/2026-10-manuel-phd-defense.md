@@ -9,7 +9,7 @@ images:
     alt: Manuel receiving his doctoral diploma from Catharine Oertel.
 standalone: false
 tags: [PhD defense]
-people: [catharine-oertel]
+people: [catharine-oertel, manuel-valle-torre]
 ---
 
 Congratulations to Dr. Manuel Valle Torre on successfully defending his PhD at TU Delft on 7 October 2026! Supervised by Catharine Oertel and Marcus Specht, Manuel explored how sequences of learner actions can help us understand and support learning.
