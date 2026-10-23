@@ -42,7 +42,7 @@ const {
   noindex = false,
 } = Astro.props;
 
-const fullTitle = bareTitle ? title : `${title} · ${site.shortName}`;
+const fullTitle = bareTitle ? title : `${title} · ${site.title}`;
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 
 const defaultOg = await getImage({ src: groupPhoto, width: 1200, height: 630, format: 'jpg', quality: 82 });
@@ -69,7 +69,7 @@ const structured = [
     <meta name="generator" content={Astro.generator} />
     <meta name="theme-color" content="#f7f5f0" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#171716" media="(prefers-color-scheme: dark)" />
-    <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={href('/favicon.ico')} type="image/x-icon" />
     <link rel="apple-touch-icon" href={href('/apple-touch-icon.png')} />
     <link rel="sitemap" href={href('/sitemap-index.xml')} />
     <link rel="alternate" type="application/rss+xml" title={`${site.shortName} news`} href={href('/rss.xml')} />

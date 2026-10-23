@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import SectionHeading from '../components/SectionHeading.astro';
@@ -7,7 +6,6 @@ import NewsItem from '../components/NewsItem.astro';
 import PublicationRow from '../components/PublicationRow.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import UnderConstruction from '../components/UnderConstruction.astro';
-import groupPhoto from '../assets/group.jpg';
 import { site } from '../site.config';
 import { href } from '../lib/url';
 import { sortPublications } from '../lib/people';
@@ -22,15 +20,15 @@ const projects = (await getCollection('projects'))
   .slice(0, 3);
 ---
 
-<Base title={site.name} bareTitle description={site.tagline}>
+<Base title={site.title} bareTitle description={site.tagline}>
   <section class="hero container">
     <figure class="hero__figure">
-      <Image
-        class="hero__photo"
-        src={groupPhoto}
-        widths={[720, 1200, 1800, 2400]}
-        sizes="(min-width: 76rem) 72rem, 100vw"
-        alt={site.groupPhotoAlt}
+      <img
+        class="hero__wordmark"
+        src={href('/dialog-wordmark.svg')}
+        width="596"
+        height="256"
+        alt="DIALOG — Interactive Intelligence"
         loading="eager"
         fetchpriority="high"
       />
@@ -105,14 +103,16 @@ const projects = (await getCollection('projects'))
   }
   .hero__figure {
     margin: 0;
-  }
-  .hero__photo {
-    width: 100%;
     aspect-ratio: 21 / 9;
-    object-fit: cover;
-    object-position: center;
     border-radius: var(--radius-lg);
-    background: var(--paper-2);
+    background: #171716;
+    overflow: hidden;
+  }
+  .hero__wordmark {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: clamp(1.5rem, 5vw, 4rem);
   }
   .hero__text {
     display: grid;
@@ -141,7 +141,7 @@ const projects = (await getCollection('projects'))
     margin-top: var(--space-m);
   }
   @media (max-width: 40em) {
-    .hero__photo {
+    .hero__figure {
       aspect-ratio: 3 / 2;
     }
   }
