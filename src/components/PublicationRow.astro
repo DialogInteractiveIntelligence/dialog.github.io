@@ -1,8 +1,9 @@
 ---
-/** One publication in a list: thumbnail, title, authors, venue and link pills. */
+/** One publication with its official link, citation copy action and full date. */
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import Authors from './Authors.astro';
+import CopyButton from './CopyButton.astro';
 import { href } from '../lib/url';
 import { publicationDate } from '../lib/format';
 
@@ -10,51 +11,36 @@ interface Props {
   pub: CollectionEntry<'publications'>;
   people: CollectionEntry<'people'>[];
   highlight?: string;
-  /** Hide the year (when rows are already grouped by year). */
-  hideYear?: boolean;
   loading?: 'lazy' | 'eager';
   /** A short text-only entry for a person's publication list. */
   compact?: boolean;
 }
-const { pub, people, highlight, hideYear = false, loading = 'lazy', compact = false } = Astro.props;
+const { pub, people, highlight, loading = 'lazy', compact = false } = Astro.props;
 const d = pub.data;
 const date = publicationDate(d);
-const dateLabel = hideYear && d.month ? date.label.replace(/ \d{4}$/, '') : date.label;
-const pageHref = href(`/publications/${pub.id}/`);
-const links = [
-  d.pdf && { label: d.pdf.includes('arxiv.org') && d.type !== 'misc' ? 'Preprint PDF' : 'PDF', url: d.pdf },
-  d.doi && { label: 'DOI', url: `https://doi.org/${d.doi}` },
-  !d.doi && d.url && { label: 'Link', url: d.url },
-  d.code && { label: 'Code', url: d.code },
-  d.website && { label: 'Website', url: d.website },
-  d.video && { label: 'Video', url: d.video },
-  d.project && { label: 'Project', url: href(`/projects/${d.project}/`) },
-].filter(Boolean) as { label: string; url: string }[];
+const doiHref = d.doi ? `https://doi.org/${d.doi}` : undefined;
+const paperHref = doiHref ?? d.url ?? href(`/publications/${pub.id}/`);
 ---
 
 <article class:list={['pub', { 'pub--compact': compact, 'pub--illustrated': d.image && !compact }]} id={pub.id}>
-  {compact && <time class="pub__date small muted" datetime={date.iso}>{date.label}</time>}
   {d.image && !compact && (
-    <a class="thumb pub__thumb" href={pageHref} aria-hidden="true" tabindex="-1">
+    <a class="thumb pub__thumb" href={paperHref} aria-hidden="true" tabindex="-1">
         <Image src={d.image} width={320} height={240} widths={[320, 640]} sizes="(min-width: 40em) 160px, 25vw" alt="" loading={loading} />
     </a>
   )}
   <div class="pub__body">
-    <h3 class="pub__title"><a href={pageHref}>{d.title}</a></h3>
+    <h3 class="pub__title"><a href={paperHref}>{d.title}</a></h3>
     {!compact && <p class="pub__authors"><Authors authors={d.authors} people={people} highlight={highlight} /></p>}
     <p class="pub__venue small muted">
       {d.venue && <cite>{d.venue}</cite>}
-      {!compact && (!hideYear || d.month) && <>{d.venue && ' · '}<time datetime={date.iso}>{dateLabel}</time></>}
       {(d.type === 'misc' || d.type === 'unpublished') && <span class="pub__status"> · Preprint</span>}
       {!d.venue && <span>{d.typeLabel}</span>}
     </p>
     <div class="pub__links">
-      {links.map((l) => <a class="pill" href={l.url} rel={l.url.startsWith('http') ? 'noopener' : undefined}>{l.label}</a>)}
-      {!compact && <details class="bibtex">
-        <summary class="pill">BibTeX</summary>
-        <pre><code>{d.bibtex}</code></pre>
-      </details>}
+      {doiHref && <a class="pub__doi" href={doiHref}>DOI</a>}
+      {!compact && <CopyButton text={d.bibtex} />}
     </div>
+    <time class="pub__date small muted" datetime={date.iso}>{date.label}</time>
   </div>
 </article>
 
@@ -68,12 +54,9 @@ const links = [
   .pub--illustrated {
     grid-template-columns: 8rem minmax(0, 1fr);
   }
-  .pub--compact {
-    grid-template-columns: 7rem minmax(0, 1fr);
-    gap: var(--space-m);
-  }
   .pub__date {
-    padding-top: 0.1rem;
+    display: block;
+    margin-top: 0.35rem;
     font-variant-numeric: tabular-nums;
   }
   .pub + .pub {
@@ -111,37 +94,18 @@ const links = [
   .pub__links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    align-items: center;
+    gap: 0.75rem;
     margin-top: 0.4rem;
     min-width: 0;
   }
-  .bibtex {
-    display: contents;
+  .pub__doi {
+    color: light-dark(#185abd, #8fc3ff);
+    font-size: var(--step--1);
+    font-weight: 700;
   }
-  .bibtex summary {
-    list-style: none;
-  }
-  .bibtex summary::-webkit-details-marker {
-    display: none;
-  }
-  .bibtex[open] summary {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
-  }
-  .bibtex pre {
-    flex-basis: 100%;
-    min-width: 0;
-    margin: 0.4rem 0 0;
-    padding: 0.85rem 1rem;
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
-    line-height: 1.5;
-    background: var(--paper-2);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    overflow-x: auto;
-    white-space: pre;
+  .pub__doi:hover {
+    text-decoration: underline;
   }
   @media (max-width: 40em) {
     .pub {

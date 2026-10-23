@@ -33,7 +33,7 @@ const jsonLd = [
           <h2 id={`year-${year}`} class="year__label">{year}</h2>
           <div class="year__list">
             {pubs.map((pub, j) => (
-              <PublicationRow pub={pub} people={people} hideYear loading={i === 0 && j < 4 ? 'eager' : 'lazy'} />
+              <PublicationRow pub={pub} people={people} loading={i === 0 && j < 4 ? 'eager' : 'lazy'} />
             ))}
           </div>
         </section>
