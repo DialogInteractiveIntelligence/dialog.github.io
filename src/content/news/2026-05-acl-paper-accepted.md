@@ -1,5 +1,6 @@
 ---
 title: Paper on multi-party grounding accepted at ACL 2026
+draft: true
 date: 2026-05-20
 summary: Our work on how language agents establish common ground in multi-party conversations will be presented in July.
 image: ../../assets/news/acl-2026.jpg

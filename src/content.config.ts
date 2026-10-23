@@ -100,6 +100,10 @@ const news = defineCollection({
       summary: z.string().max(300),
       image: image().optional(),
       imageAlt: z.string().optional(),
+      /** Optional pair of photos in the news card header. */
+      images: z.array(z.object({ src: image(), alt: z.string() })).max(2).default([]),
+      /** False displays the full post inline, without linking to an article page. */
+      standalone: z.boolean().default(true),
       /** e.g. ["paper", "grant", "talk", "award", "people"] */
       tags: z.array(z.string()).default([]),
       /** Related project slugs. */

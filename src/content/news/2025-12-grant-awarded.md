@@ -1,5 +1,6 @@
 ---
 title: Grant awarded for research on conversational repair
+draft: true
 date: 2025-12-03
 summary: A new four-year grant will fund a PhD position on how people and agents recover from misunderstandings.
 tags:

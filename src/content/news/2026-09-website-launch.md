@@ -1,5 +1,6 @@
 ---
 title: New group website
+draft: true
 date: 2026-09-18
 summary: The group has a new home on the web, with people, projects, publications and news in one place.
 tags:

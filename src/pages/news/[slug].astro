@@ -11,7 +11,7 @@ import { breadcrumbJsonLd, newsJsonLd } from '../../lib/seo';
 import { formatDate } from '../../lib/format';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('news', ({ data }) => !data.draft);
+  const posts = await getCollection('news', ({ data }) => !data.draft && data.standalone);
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 }
 

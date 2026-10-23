@@ -108,6 +108,12 @@ date: 2026-05-20
 summary: One or two sentences (max 300 chars).
 image: ../../assets/news/<file>.jpg       # optional, 3:2
 imageAlt: Description
+images:                                  # optional pair of header photos, replaces image
+  - src: ../../assets/news/<first>.jpg
+    alt: Description of the first photo
+  - src: ../../assets/news/<second>.jpg
+    alt: Description of the second photo
+standalone: false                        # full Markdown body in the card, no article link
 tags: [paper]                             # e.g. paper, grant, talk, award, people
 people: [jane-doe]                        # optional, links the post to people
 projects: [dialogue-grounding]            # optional
@@ -120,6 +126,8 @@ Body in Markdown.
 ```
 
 Posts appear on the homepage, in `/news/`, in the RSS feed and on linked people/project pages.
+
+The shared `NewsItem.astro` template gives news cards the same width, photo-header proportions, content spacing and border. Cards grow when needed to keep all text readable. Use `standalone: false` for short announcements displayed entirely on the news page. The default (`true`) links to a separate article page. Keep unfinished and example posts as `draft: true`.
 
 ## Where the site lives
 

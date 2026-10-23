@@ -16,7 +16,7 @@ export async function GET(context: APIContext) {
       title: post.data.title,
       pubDate: post.data.date,
       description: post.data.summary,
-      link: absolute(`/news/${post.id}/`, context.site),
+      link: absolute(post.data.standalone ? `/news/${post.id}/` : `/news/#${post.id}`, context.site),
       categories: post.data.tags,
     })),
     customData: `<language>${site.locale}</language>`,

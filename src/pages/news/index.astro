@@ -3,82 +3,50 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import NewsItem from '../../components/NewsItem.astro';
-import UnderConstruction from '../../components/UnderConstruction.astro';
-import { site } from '../../site.config';
-import { href } from '../../lib/url';
 import { breadcrumbJsonLd, collectionPageJsonLd } from '../../lib/seo';
 
 const posts = (await getCollection('news', ({ data }) => !data.draft)).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-
 const byYear = new Map<number, typeof posts>();
 for (const post of posts) {
-  const y = post.data.date.getFullYear();
-  byYear.set(y, [...(byYear.get(y) ?? []), post]);
+  const year = post.data.date.getFullYear();
+  byYear.set(year, [...(byYear.get(year) ?? []), post]);
 }
-
-const description = `News from ${site.name}: papers, talks, grants, awards and people.`;
+const description = 'The latest research, milestones and celebrations from DIALOG.';
 const jsonLd = [
   breadcrumbJsonLd([{ name: 'Home', path: '/' }, { name: 'News', path: '/news/' }], Astro.site),
-  collectionPageJsonLd('News', description, '/news/', Astro.site, posts.map((p) => ({ name: p.data.title, path: `/news/${p.id}/` }))),
+  collectionPageJsonLd('News', description, '/news/', Astro.site, posts.map((p) => ({
+    name: p.data.title,
+    path: p.data.standalone ? `/news/${p.id}/` : `/news/#${p.id}`,
+  }))),
 ];
 ---
 
 <Base title="News" description={description} jsonLd={jsonLd}>
-  <PageHeader eyebrow="What's happening" title="News" lede={description}>
-    {
-      /*
-      <p class="small faint"><a class="link" href={href('/rss.xml')}>Subscribe via RSS</a></p>
-      */
-    }
-  </PageHeader>
-
-  <div class="container">
-    {
-      /*
-      [...byYear.entries()].map(([year, items]) => (
-        <section class="year" aria-labelledby={`year-${year}`}>
-          <h2 id={`year-${year}`} class="year__label">{year}</h2>
-          <div class="year__list">
-            {items.map((post) => (
-              <NewsItem post={post} />
-            ))}
-          </div>
-        </section>
-      ))
-      */
-    }
+  <PageHeader title="News" />
+  <div class="container news-archive">
+    {[...byYear.entries()].map(([year, items]) => (
+      <section class="year" aria-labelledby={`year-${year}`}>
+        <h2 id={`year-${year}`} class="year__label">{year}</h2>
+        <div class="year__list">
+          {items.map((post) => <NewsItem post={post} />)}
+        </div>
+      </section>
+    ))}
   </div>
-  <UnderConstruction />
 </Base>
 
 <style>
-  .year {
-    display: grid;
-    grid-template-columns: 6rem minmax(0, 1fr);
-    gap: var(--space-m) var(--space-l);
-    padding-block: var(--space-l);
-  }
-  .year + .year {
-    border-top: 1px solid var(--line);
-  }
+  .news-archive { padding-bottom: var(--space-2xl); }
+  .year + .year { margin-top: var(--space-xl); }
   .year__label {
-    font-size: var(--step-2);
-    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    margin-bottom: var(--space-m);
+    color: var(--ink-2);
+    font-size: var(--step-0);
     font-variant-numeric: tabular-nums;
-    position: sticky;
-    top: var(--space-m);
-    align-self: start;
   }
-  .year__list > :global(.news-item:first-child) {
-    padding-top: 0;
-  }
-  @media (max-width: 40em) {
-    .year {
-      grid-template-columns: 1fr;
-      gap: var(--space-s);
-    }
-    .year__label {
-      position: static;
-    }
-  }
+  .year__label::after { content: ''; flex: 1; height: 1px; background: var(--line-strong); }
+  .year__list { display: grid; gap: var(--space-l); }
 </style>

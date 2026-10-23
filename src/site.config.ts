@@ -63,10 +63,10 @@ export const site = {
 
   /** Header navigation. Paths are relative to the site base. */
   nav: [
+    { label: 'News', href: '/news/' },
     { label: 'People', href: '/people/' },
     { label: 'Projects', href: '/projects/' },
     { label: 'Publications', href: '/publications/' },
-    { label: 'News', href: '/news/' },
   ],
 } as const;
 

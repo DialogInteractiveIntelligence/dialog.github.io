@@ -85,7 +85,8 @@ export async function buildLlmsText(siteUrl: URL | undefined, full: boolean): Pr
   lines.push('## News');
   lines.push('');
   for (const post of news) {
-    lines.push(`- ${post.data.date.toISOString().slice(0, 10)}: [${post.data.title}](${url(`/news/${post.id}/`)}). ${post.data.summary}`);
+    const postPath = post.data.standalone ? `/news/${post.id}/` : `/news/#${post.id}`;
+    lines.push(`- ${post.data.date.toISOString().slice(0, 10)}: [${post.data.title}](${url(postPath)}). ${post.data.summary}`);
     if (full) {
       const body = stripFrontmatter(post.body);
       if (body) lines.push(`  ${body.replace(/\n+/g, ' ')}`);
